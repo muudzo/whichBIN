@@ -1,0 +1,147 @@
+{
+  "city": "Leeuwarden",
+  "checked": "2026-10-19",
+  "sources": {
+    "omrin-2026-en": {
+      "title": "Omrin, Waste Guide 2026, Leeuwarden (English edition)",
+      "url": "https://www.omrin.nl/media/0cphazwn/6466-omri_bro_afvalwijzer_2026-engels.pdf"
+    },
+    "omrin-2026-nl": {
+      "title": "Omrin, Afvalwijzer 2026, Leeuwarden (Dutch edition)",
+      "url": "https://www.omrin.nl/media/a2ocvunp/6466_bro_afvalwijzer_nl_2026-def.pdf"
+    }
+  },
+  "bins": [
+    { "id": "sortibak", "name": "Sortibak", "english": "grey bin, residual" },
+    { "id": "biobak", "name": "Biobak", "english": "food, organic" },
+    { "id": "papierbak", "name": "Papierbak", "english": "paper, cardboard" },
+    { "id": "glasbak", "name": "Glasbak", "english": "glass, on the street" },
+    { "id": "textielbak", "name": "Textielbak", "english": "clothes, on the street" },
+    { "id": "not-a-bin", "name": "Not a bin", "english": "it goes elsewhere" }
+  ],
+  "items": [
+    {
+      "id": "jam-jar",
+      "name": "Jam jar",
+      "bin": "glasbak",
+      "why": "Glass jars go in a shared glass container near you, not a bin at home. Dirty is fine, and the lid can stay on.",
+      "pages": [7, 11],
+      "status": "confirmed"
+    },
+    {
+      "id": "wine-bottle",
+      "name": "Empty wine bottle",
+      "bin": "glasbak",
+      "why": "Wine bottles go in a shared glass container. The Omrin Waste App shows the nearest one.",
+      "pages": [7, 11],
+      "status": "confirmed"
+    },
+    {
+      "id": "wine-glass",
+      "name": "Broken wine glass",
+      "bin": "sortibak",
+      "why": "Drinking glasses don't go in the glass container. A wine glass goes in the Sortibak, with residual waste.",
+      "pages": [11],
+      "status": "confirmed"
+    },
+    {
+      "id": "pizza-box",
+      "name": "Used pizza box",
+      "bin": "sortibak",
+      "why": "A used, dirty pizza box isn't recyclable paper. It goes in the Sortibak.",
+      "pages": [10],
+      "status": "confirmed"
+    },
+    {
+      "id": "drink-carton",
+      "name": "Milk carton",
+      "bin": "sortibak",
+      "why": "Drink cartons aren't paper. They go in the Sortibak, and Omrin's machines sort them out afterwards.",
+      "pages": [8, 10, 17],
+      "status": "confirmed"
+    },
+    {
+      "id": "plastic-packaging",
+      "name": "Plastic food packaging",
+      "bin": "sortibak",
+      "why": "Plastic goes in the Sortibak. Omrin's machines sort the plastic out afterwards.",
+      "pages": [8, 17],
+      "status": "category"
+    },
+    {
+      "id": "food-leftovers",
+      "name": "Leftover pasta",
+      "bin": "biobak",
+      "why": "Food leftovers go in the Biobak, or in the shared organic waste container if you live in a flat.",
+      "pages": [6, 9],
+      "status": "confirmed"
+    },
+    {
+      "id": "egg-carton",
+      "name": "Cardboard egg carton",
+      "bin": "papierbak",
+      "why": "Egg cartons are paper. They go in the paper bin or a paper container.",
+      "pages": [10],
+      "status": "confirmed"
+    },
+    {
+      "id": "window-envelope",
+      "name": "Envelope with a window",
+      "bin": "papierbak",
+      "why": "Envelopes go in the paper bin, even the ones with a window.",
+      "pages": [10],
+      "status": "confirmed"
+    },
+    {
+      "id": "cardboard-box",
+      "name": "Clean cardboard box",
+      "bin": "papierbak",
+      "why": "Clean cardboard goes in the paper bin or a paper container.",
+      "pages": [10],
+      "status": "confirmed"
+    },
+    {
+      "id": "torn-tshirt",
+      "name": "Torn T-shirt",
+      "bin": "textielbak",
+      "why": "Clothes go in the textile container, even worn or torn ones. Put them in a closed plastic bag.",
+      "pages": [12, 19],
+      "status": "confirmed"
+    },
+    {
+      "id": "shoes",
+      "name": "Old pair of shoes",
+      "bin": "textielbak",
+      "why": "Shoes go in the textile container. Tie each pair together.",
+      "pages": [12],
+      "status": "confirmed"
+    },
+    {
+      "id": "batteries",
+      "name": "Used batteries",
+      "bin": "not-a-bin",
+      "where": "Red KCA box, then the chemokar or the milieustraat",
+      "why": "Batteries are hazardous waste (KCA). Keep them in your red KCA box and hand them in at the chemokar for free.",
+      "pages": [7],
+      "status": "confirmed"
+    },
+    {
+      "id": "mattress",
+      "name": "Old mattress",
+      "bin": "not-a-bin",
+      "where": "Milieustraat (recycling centre)",
+      "why": "Mattresses go to the milieustraat, for free. Book a time slot and bring your milieupas.",
+      "pages": [12, 14],
+      "status": "confirmed"
+    },
+    {
+      "id": "frying-oil",
+      "name": "Used frying oil",
+      "bin": "not-a-bin",
+      "where": "Milieustraat or your supermarket",
+      "why": "Frying oil doesn't go in any bin. Take it to the milieustraat or your local supermarket.",
+      "pages": [9],
+      "status": "confirmed"
+    }
+  ]
+}
