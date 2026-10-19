@@ -1,0 +1,16 @@
+# Notes and files for Claude: kept on this computer, never pushed
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+claude-context/
+
+# Scraped reviews (make them again with: npm start)
+out/
+
+# Node
+node_modules/
+coverage/
+
+# macOS and Word
+.DS_Store
+~$*
