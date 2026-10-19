@@ -1,28 +1,29 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const DEFAULT_APP_ID = '479597294'; 
+const DEFAULT_APP_ID = '479597294'; // used when no app id is given on the command line
 const DEFAULT_COUNTRY = 'nl'; // which App Store: nl = the Netherlands
 const MAX_PAGES = 10; // Apple serves pages 1–10 (50 reviews each); page 11 answers HTTP 400
 const PAUSE_MS = 500; // wait between requests, so we don't hammer Apple's server
-const TIMEOUT_MS = 15000; 
-const END_OF_FEED_STATUS = 400; 
+const TIMEOUT_MS = 15000; // give up on a request that takes longer than 15 seconds
+const END_OF_FEED_STATUS = 400; // what Apple answers once you ask for a page past the last one
+const OUT_DIR = new URL('./out/', import.meta.url); // out/ next to this file, wherever it's run from
 
 export function parseArgs(argv) {
   const [appId = DEFAULT_APP_ID, country = DEFAULT_COUNTRY] = argv;
-
 
   if (!/^\d+$/.test(appId)) {
     throw new Error(`The app id must be only digits (got "${appId}"). Find it in the app's App Store URL.`);
   }
 
-
   if (!/^[a-z]{2}$/.test(country)) {
     throw new Error(`The store must be a two-letter country code like "nl" (got "${country}").`);
   }
+
   return { appId, country };
 }
-//the address the scraper will be pointing to 
+
+// the address the scraper will be pointing to
 export function feedUrl(page, { appId, country, fresh }) {
   const url = `https://itunes.apple.com/${country}/rss/customerreviews/page=${page}/id=${appId}/sortby=mostrecent/json`;
   return fresh ? `${url}?fresh=${fresh}` : url;
@@ -51,8 +52,8 @@ export async function fetchPage(page, options, fetchFn = fetch) {
 export function toEntries(data) {
   const entry = data?.feed?.entry;
   if (!entry) return [];
-  const list = Array.isArray(entry) ? entry : [entry];
-  return list.filter((item) => item?.['im:rating']?.label);
+  const list = Array.isArray(entry) ? entry : [entry]; // a feed with one review sends an object, not a list
+  return list.filter((item) => item?.['im:rating']?.label); // keep only entries that are real reviews
 }
 
 const labelOf = (field) => field?.label ?? '';
@@ -72,31 +73,22 @@ export function toRow(entry) {
   };
 }
 
-const idOf = (entry) => labelOf(entry.id);
-
-//wrap reviews with where and when they came from
-export function buildReport({ appId, country, rows, pagesRead, stoppedBecause, complete, scrapedAt }) {
-  return {
-    appId,
-    country,
-    source: feedUrl(1, { appId, country }),
-    scrapedAt,
-    pagesRead,
-    stoppedBecause,
-    complete,
-    count: rows.length,
-    reviews: rows,
-  };
-}
-
-
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const idOf = (entry) => labelOf(entry.id);
+
+// a review posted mid-scrape pushes the list down, so one can turn up on two pages; keep the first copy
 const uniqueById = (entries) =>
   entries.filter(
     (entry, index) => idOf(entry) === '' || entries.findIndex((other) => idOf(other) === idOf(entry)) === index,
   );
 
+const finish = (entries, pagesRead, stoppedBecause, complete) => ({
+  rows: uniqueById(entries).map(toRow),
+  pagesRead,
+  stoppedBecause,
+  complete,
+});
 
 export async function scrapeAll({
   appId,
@@ -128,14 +120,20 @@ export async function scrapeAll({
   return finish(collected, maxPages, `reached the ${maxPages}-page limit`, true);
 }
 
-const finish = (entries, pagesRead, stoppedBecause, complete) => ({
-  rows: uniqueById(entries).map(toRow),
-  pagesRead,
-  stoppedBecause,
-  complete,
-  });
-
-  const OUT_DIR = new URL('./out/', import.meta.url);
+// wrap reviews with where and when they came from
+export function buildReport({ appId, country, rows, pagesRead, stoppedBecause, complete, scrapedAt }) {
+  return {
+    appId,
+    country,
+    source: feedUrl(1, { appId, country }),
+    scrapedAt,
+    pagesRead,
+    stoppedBecause,
+    complete,
+    count: rows.length,
+    reviews: rows,
+  };
+}
 
 async function main() {
   try {
@@ -145,7 +143,7 @@ async function main() {
     const { rows, pagesRead, stoppedBecause, complete } = await scrapeAll({ appId, country });
 
     if (rows.length === 0) {
-      console.error(`No reviews saved. Stopped at ${stoppedBecause}.`);
+      console.error(`No reviews saved. Stopped because: ${stoppedBecause}`);
       process.exitCode = 1;
       return;
     }
@@ -162,25 +160,23 @@ async function main() {
 
     await mkdir(OUT_DIR, { recursive: true });
     const outFile = new URL(`reviews-${appId}-${country}.json`, OUT_DIR);
-   
     await writeFile(outFile, JSON.stringify(report, null, 2) + '\n', 'utf8');
 
     console.log(`Saved ${report.count} reviews from ${pagesRead} pages to ${fileURLToPath(outFile)}`);
     console.log(`Stopped because: ${stoppedBecause}`);
 
-    
+    if (!complete) {
       console.error('Warning: this scrape was cut short by an error, so the file is incomplete. Run it again.');
       process.exitCode = 1;
     }
   } catch (error) {
-    // Anything not planned for ends up here, with a readable message
-.
+    // Anything not planned for ends up here, with a readable message.
     console.error(`Scraper failed: ${error.message}`);
     process.exitCode = 1;
   }
 }
 
-
+// only run main() when this file is started directly (node scraper.js), not when a test imports it
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
