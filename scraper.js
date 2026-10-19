@@ -134,3 +134,53 @@ const finish = (entries, pagesRead, stoppedBecause, complete) => ({
   stoppedBecause,
   complete,
   });
+
+  const OUT_DIR = new URL('./out/', import.meta.url);
+
+async function main() {
+  try {
+    const { appId, country } = parseArgs(process.argv.slice(2));
+    console.log(`Scraping app ${appId} in the "${country}" App Store…`);
+
+    const { rows, pagesRead, stoppedBecause, complete } = await scrapeAll({ appId, country });
+
+    if (rows.length === 0) {
+      console.error(`No reviews saved. Stopped at ${stoppedBecause}.`);
+      process.exitCode = 1;
+      return;
+    }
+
+    const report = buildReport({
+      appId,
+      country,
+      rows,
+      pagesRead,
+      stoppedBecause,
+      complete,
+      scrapedAt: new Date().toISOString(), // e.g. "2026-10-19T12:00:00.000Z" (UTC)
+    });
+
+    await mkdir(OUT_DIR, { recursive: true });
+    const outFile = new URL(`reviews-${appId}-${country}.json`, OUT_DIR);
+   
+    await writeFile(outFile, JSON.stringify(report, null, 2) + '\n', 'utf8');
+
+    console.log(`Saved ${report.count} reviews from ${pagesRead} pages to ${fileURLToPath(outFile)}`);
+    console.log(`Stopped because: ${stoppedBecause}`);
+
+    
+      console.error('Warning: this scrape was cut short by an error, so the file is incomplete. Run it again.');
+      process.exitCode = 1;
+    }
+  } catch (error) {
+    // Anything not planned for ends up here, with a readable message
+.
+    console.error(`Scraper failed: ${error.message}`);
+    process.exitCode = 1;
+  }
+}
+
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
