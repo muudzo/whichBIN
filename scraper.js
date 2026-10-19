@@ -1,7 +1,17 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const DEFAULT_APP_ID = '694013412'; // Omrin Afval, Leeuwarden's waste app; used when no app id is given
+// the Dutch waste apps whose reviews we collect; the id is the number in each app's App Store URL
+export const APPS = [
+  { id: '694013412', name: 'Omrin Afval' }, // Leeuwarden and the rest of Friesland
+  { id: '479597294', name: 'Afvalwijzer' },
+  { id: '1537977535', name: 'Circulus' },
+  { id: '1537096947', name: 'HVC App' },
+  { id: '1386637391', name: 'Almere Afval' },
+  { id: '742028202', name: 'Afvalstoffendienst' }, // 's-Hertogenbosch
+  { id: '1470962213', name: 'PreZero inzamelwijzer' },
+];
+
 const DEFAULT_COUNTRY = 'nl'; // which App Store: nl = the Netherlands
 const MAX_PAGES = 10; // Apple serves pages 1–10 (50 reviews each); past the last review a page comes back empty
 const PAUSE_MS = 500; // wait between requests, so we don't hammer Apple's server
@@ -10,18 +20,17 @@ const TIME_ZONE = 'Europe/Amsterdam'; // Apple stamps reviews in US Pacific time
 const OUT_DIR = new URL('./out/', import.meta.url); // out/ next to this file, wherever it's run from
 
 export function parseArgs(argv) {
-  const [appId = DEFAULT_APP_ID, store = DEFAULT_COUNTRY] = argv;
+  const [store = DEFAULT_COUNTRY] = argv;
   const country = store.toLowerCase(); // "NL" and "nl" are the same store
 
-  if (!/^\d+$/.test(appId)) {
-    throw new Error(`The app id must be only digits (got "${appId}"). Find it in the app's App Store URL.`);
-  }
-
   if (!/^[a-z]{2}$/.test(country)) {
-    throw new Error(`The store must be a two-letter country code like "nl" (got "${country}").`);
+    throw new Error(
+      `The store must be a two-letter country code like "nl" (got "${store}"). ` +
+        'To change which apps are scraped, edit APPS at the top of scraper.js.',
+    );
   }
 
-  return { appId, country };
+  return { country };
 }
 
 // the address the scraper will be pointing to
@@ -132,61 +141,76 @@ export async function scrapeAll({
   return finish(collected, maxPages, `reached the ${maxPages}-page limit`, true);
 }
 
-// wrap reviews with where and when they came from
-export function buildReport({ appId, country, rows, pagesRead, stoppedBecause, complete, scrapedAt }) {
+// one app after another, never at the same time, so Apple only sees one request every half second
+export async function scrapeApps({ apps, country, maxPages, fetchFn, wait = sleep, fresh }) {
+  let results = [];
+
+  for (const [index, app] of apps.entries()) {
+    const scraped = await scrapeAll({ appId: app.id, country, maxPages, fetchFn, wait, fresh });
+    results = [...results, { app, ...scraped }]; // an app that fails stays in (complete: false) and the next one still runs
+    if (index < apps.length - 1) await wait(PAUSE_MS);
+  }
+
+  return results;
+}
+
+// one file for all apps: a summary per app, then every review tagged with the app it is about
+export function buildReport({ country, results, scrapedAt }) {
+  const reviews = results.flatMap(({ app, rows }) => rows.map((row) => ({ appId: app.id, app: app.name, ...row })));
+
   return {
-    appId,
     country,
-    source: feedUrl(1, { appId, country }),
     scrapedAt,
-    pagesRead,
-    stoppedBecause,
-    complete,
-    count: rows.length,
-    reviews: rows,
+    complete: results.every((scraped) => scraped.complete),
+    count: reviews.length,
+    apps: results.map(({ app, rows, pagesRead, stoppedBecause, complete }) => ({
+      id: app.id,
+      name: app.name,
+      source: feedUrl(1, { appId: app.id, country }),
+      count: rows.length,
+      pagesRead,
+      stoppedBecause,
+      complete,
+    })),
+    reviews,
   };
 }
 
 // a cut-short scrape gets its own file, so a failed rerun never replaces an earlier complete one
-export const reportFileName = ({ appId, country, complete }) =>
-  `reviews-${appId}-${country}${complete ? '' : '.partial'}.json`;
+export const reportFileName = ({ country, complete }) => `reviews-${country}${complete ? '' : '.partial'}.json`;
+
+const summaryLine = (app) =>
+  `  ${app.complete ? '✓' : '✗'} ${app.name}: ${app.count} reviews (stopped because: ${app.stoppedBecause})`;
 
 async function main() {
   try {
-    const { appId, country } = parseArgs(process.argv.slice(2));
-    console.log(`Scraping app ${appId} in the "${country}" App Store…`);
+    const { country } = parseArgs(process.argv.slice(2));
+    console.log(`Scraping ${APPS.length} apps in the "${country}" App Store…`);
 
-    const { rows, pagesRead, stoppedBecause, complete } = await scrapeAll({ appId, country });
+    const results = await scrapeApps({ apps: APPS, country });
+    const report = buildReport({
+      country,
+      results,
+      scrapedAt: new Date().toISOString(), // e.g. "2026-10-19T12:00:00.000Z" (UTC)
+    });
 
-    if (rows.length === 0) {
-      console.error(`No reviews saved. Stopped because: ${stoppedBecause}`);
-      if (complete) {
-        // an empty first page looks the same for a wrong id as for an app nobody has reviewed
-        console.error(`Check the app id, or this app has no written reviews in the "${country}" store.`);
-      }
+    report.apps.forEach((app) => console.log(summaryLine(app)));
+
+    if (report.count === 0) {
+      // an empty first page looks the same for a wrong id as for an app nobody has reviewed
+      console.error(`No reviews saved. Check the ids in APPS, or these apps have no reviews in the "${country}" store.`);
       process.exitCode = 1;
       return;
     }
 
-    const report = buildReport({
-      appId,
-      country,
-      rows,
-      pagesRead,
-      stoppedBecause,
-      complete,
-      scrapedAt: new Date().toISOString(), // e.g. "2026-10-19T12:00:00.000Z" (UTC)
-    });
-
     await mkdir(OUT_DIR, { recursive: true });
-    const outFile = new URL(reportFileName({ appId, country, complete }), OUT_DIR);
+    const outFile = new URL(reportFileName(report), OUT_DIR);
     await writeFile(outFile, JSON.stringify(report, null, 2) + '\n', 'utf8');
 
-    console.log(`Saved ${report.count} reviews from ${pagesRead} pages to ${fileURLToPath(outFile)}`);
-    console.log(`Stopped because: ${stoppedBecause}`);
+    console.log(`Saved ${report.count} reviews from ${report.apps.length} apps to ${fileURLToPath(outFile)}`);
 
-    if (!complete) {
-      console.error('Warning: this scrape was cut short by an error, so it was saved as a .partial file.');
+    if (!report.complete) {
+      console.error('Warning: at least one app was cut short by an error (✗ above), so this was saved as a .partial file.');
       console.error('Any earlier complete file was left alone. Run it again to get everything.');
       process.exitCode = 1;
     }

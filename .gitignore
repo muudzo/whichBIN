@@ -4,6 +4,9 @@ CLAUDE.local.md
 .claude/
 claude-context/
 
+# Learning goals (school documents, e.g. Learning-Goals-Sprint3-Which-Bin.docx, "learning goals .pdf")
+*[Ll]earning*[Gg]oals*
+
 # Scraped reviews (make them again with: npm start)
 out/
 
