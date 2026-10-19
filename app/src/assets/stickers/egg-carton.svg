@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- Which Bin? custom sticker: open cardboard egg carton, no eggs (an egg would read as food waste) -->
+  <path d="M4.5 14 L6.5 6 H25.5 L27.5 14 Z" fill="#DCCDB3"/>
+  <path d="M3 15.5 Q6.5 9.5 10 15.5 Q13.5 9.5 17 15.5 Q20.5 9.5 24 15.5 Q26.5 11 29 15.5 Z" fill="#D2C1A4"/>
+  <path d="M3 15.5 H29 V22.5 Q29 24.5 27 24.5 H5 Q3 24.5 3 22.5 Z" fill="#C2AE8F"/>
+  <path d="M10 16.5 V24.5 M17 16.5 V24.5 M24 16.5 V24.5" stroke="#AD9878" stroke-width="1"/>
+</svg>
