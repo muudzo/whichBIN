@@ -1,0 +1,64 @@
+/*
+ * Which Bin? brand tokens: "Frisian sticker game".
+ * The single source of truth for colour, type, shape and motion. The brand book (design/brand-book.html) documents them.
+ * Contrast checked 19 Oct 2026: every text pair used below is at least 4.5:1.
+ */
+
+@theme {
+  /* Palette */
+  --color-ink: #13233f;          /* text, outlines, hard shadows · 14.8:1 on cream */
+  --color-ink-muted: #4a5876;    /* secondary text · 6.8:1 on cream */
+  --color-fries-blue: #1b4fa3;   /* primary · white on it 7.8:1 */
+  --color-sky: #dce8fa;          /* light blue tint */
+  --color-pompebled: #d7263d;    /* lives, "not quite" · white on it 5.0:1 */
+  --color-meadow: #17703d;       /* right answers · white on it 6.1:1 */
+  --color-sun: #ffc531;          /* score, streak, highlights · ink on it 9.9:1 · never text on cream */
+  --color-cream: #fff8ec;        /* page background: not plain white */
+  --color-paper: #ffffff;        /* cards and sheets */
+  --color-sortibak: #8a9099;     /* the Sortibak's real colour: grey (Omrin guide p. 4) */
+
+  /* Bin tints: game colours, NOT Omrin's lid colours (only the Sortibak's grey is confirmed) */
+  --color-bin-sortibak: #e4e7eb;
+  --color-bin-biobak: #ddf1e4;
+  --color-bin-papierbak: #dce8fa;
+  --color-bin-glasbak: #d9f1ef;
+  --color-bin-textielbak: #fff0c2;
+  --color-bin-not-a-bin: #fbe0e3;
+
+  /* Type: two families, self-hosted */
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+
+  /* Shape: the sticker look */
+  --radius-sticker: 18px;
+  --shadow-sticker: 4px 4px 0 0 var(--color-ink);
+  --shadow-sticker-sm: 2px 2px 0 0 var(--color-ink);
+  --shadow-sticker-lift: 6px 8px 0 0 var(--color-ink);
+
+  /* Motion */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* shadcn components read these names; they point at the brand tokens. Light theme only for now. */
+:root {
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
+  --card: var(--color-paper);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-paper);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-fries-blue);
+  --primary-foreground: var(--color-paper);
+  --secondary: var(--color-paper);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-sky);
+  --muted-foreground: var(--color-ink-muted);
+  --accent: var(--color-sun);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-pompebled);
+  --border: var(--color-ink);
+  --input: var(--color-ink);
+  --ring: var(--color-fries-blue);
+  --radius: 0.875rem;
+}
