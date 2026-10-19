@@ -1,0 +1,128 @@
+# Learning-goal evidence map
+
+> A living list. For each line of my learning goals (`learning goals2026P1.pdf`) it shows what proves it, where that lives, how to show it in about a minute, and what's still missing. Update it whenever a deliverable lands. It lists facts only; whether the evidence is enough is for me and the assessors to judge.
+
+**Status:** Mon 19 Oct 2026 · deadline Fri 23 Oct (morning)
+
+## Showcase list: the headline demos
+
+1. **Before and after.** Show Mid-fi v3 screens A1 (welcome) and C2 (round) beside the coded `design/screens/01-welcome.png` and `design/screens/03-round.png`. Export the two Figma frames from the Figma app, which uses none of the connector's reads, into `design/before-after/`.
+2. **Live on a phone.** Play one round, get one wrong to show "Not quite" with the Omrin page, then open the leaderboard.
+3. **Tests running.** `npm test` (46 unit tests) and `npm run test:e2e` (17 browser tests on four phone sizes). Testing found real problems:
+   - The app tests caught a timing bug: a fast tap answered the next item (fixed in `a8306e6`).
+   - The screenshots showed that on the smallest iPhone, Play sat below the screen and the lives bar scrolled away. This was fixed in `ce0931d`, and a browser test now checks it.
+4. **The commit history.** `git log --oneline main..feat/app-boilerplate` gives one small step per commit, a trace of how the app was built.
+5. **Agent skill 1 live.** Run `check-rule-sources` on one item, then show its evidence in `research/rule-sources.md` and the result in `app/src/data/items.json`.
+6. **A 5-minute MCP and agent skill demo for classmates** (SCRUM-72), following the storyline in `notes/work-log.md`:
+   1. A Figma read leads to a design critique.
+   2. A Jira comment.
+   3. Publishing a private page.
+   4. The agent skill.
+7. **The brand book**, https://claude.ai/artifact/7V3DWDi2mxSp17hoHoyrcm. Its measured contrast ratios are usability evidence.
+8. **`AI_USE_LOG.md`**, once I've filled in "What we did" and "What we learned". It shows fair use: what the AI did next to what I did.
+9. **The work log's "Problems and how we solved them" tables**: raw material for Gibbs.
+
+---
+
+## Create
+
+### Research and define requirements
+- **Evidence now:**
+  - The review scraper (`scraper.js`, tests in `scraper.test.js`) collected 1,462 App Store reviews of 7 waste apps, with no reviewer names.
+  - 15 Omrin items, each with a quote, page and check date (`research/rule-sources.md`, `app/src/data/items.json`).
+  - Test 1 grouped into five themes (`research/test-1-findings.md`).
+- **Show it:** one item's journey: the quote in Omrin's guide → `research/rule-sources.md` → its "why" line in the game.
+- **Still missing:**
+  - The residents' survey analysis.
+  - The review findings written up in `research/` (now only in my local notes).
+  - A finding → decision trace table.
+- **Jira:** SCRUM-68, SCRUM-69
+
+### Prototype in Figma, then turn the tested design into components
+- **Evidence now:**
+  - Mid-fi v3 (15 screens), tested in test 1.
+  - The design critique and its 10 changes (`notes/plans/2026-10-19-design-brand-boilerplate.md`).
+  - Five coded screens (`app/src/features/`, screenshots in `design/screens/`).
+- **Show it:** the before-and-after pair (showcase 1), then one change traced from a test 1 theme → critique finding → screen. For example, "didn't know what it was" → the "Your Move" welcome → a welcome that says what the game is.
+- **Still missing:** the before-and-after export.
+- **Jira:** SCRUM-26
+
+### Architecture diagrams
+- **Evidence now:** the score store interface (`app/src/services/scoreStore.ts`) defines what the backend must do. The diagrams can follow it.
+- **Still missing:** both diagrams: the application, and answer submission → storage → database.
+- **Jira:** SCRUM-75
+
+### Frontend
+- **Evidence now:**
+  - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
+  - 46 unit tests and 17 browser tests on four phone sizes.
+  - The game rules are plain, tested functions (`app/src/domain/game.ts`).
+- **Show it:** showcases 2 and 3, then walk through `roundReducer` in `app/src/domain/game.ts`: what happens on a right answer, a wrong answer and "continue".
+- **Still missing:**
+  - Touch drag and drop.
+  - Round-end motion.
+  - A check on a real phone, with a note of which phone.
+- **Jira:** SCRUM-32
+
+### Backend and database (Supabase)
+- **Evidence now:** none yet. The app is ready for it: `createLocalScoreStore()` gets swapped for a Supabase store with the same interface.
+- **Still missing:**
+  - Tables for players and answers.
+  - Aggregate scores.
+  - Row level security: inserting answers is allowed; changing or deleting them is not.
+  - A test that proves the client can't update or delete.
+- **Jira:** SCRUM-51, SCRUM-52, SCRUM-53, SCRUM-54
+
+### Integrate, test, deploy
+- **Evidence now:** none yet.
+- **Still missing:** the frontend connected to Supabase, tests of submissions, scores and permissions, and a public link (Cloudflare Pages).
+- **Jira:** SCRUM-27
+
+### Three test iterations with international students
+- **Evidence now:** test 1 → MoSCoW change list → changes in the code. Test 2 questions drafted (`research/test-1-findings.md`).
+- **Still missing:**
+  - Test 2 on the coded app.
+  - Test 3.
+  - For each test, what changed because of it.
+- **Jira:** SCRUM-24, SCRUM-33, SCRUM-55
+
+---
+
+## Learn
+
+### Map PayNow skills, find gaps, prioritise (MoSCoW + timeboxes)
+- **Evidence now:**
+  - The stack choice in `notes/work-log.md` (the PayNow stack minus what Which Bin doesn't need).
+  - MoSCoW used on the test 1 changes.
+  - The usability checks applied on 19 Oct (listed in the work log).
+- **Still missing:** the skills map itself: PayNow skill → where it shows up in Which Bin → the gap → priority and timebox.
+- **Jira:** SCRUM-70, SCRUM-39, SCRUM-40
+
+### Apply and evaluate AI workflows (fair-use guide, two agent skills)
+- **Evidence now:**
+  - Agent skill 1 (`.claude/skills/check-rule-sources/`) and its first run.
+  - The MCP connectors used on 19 Oct (Figma, Atlassian, Artifact), recorded in `notes/work-log.md`.
+  - `AI_USE_LOG.md`, one row per AI-made deliverable.
+- **Still missing:**
+  - Agent skill 2 (test notes → changes log).
+  - The one-page fair-use guide.
+  - My columns in `AI_USE_LOG.md`.
+  - A decision on sharing `AI_USE_LOG.md`: it is git-ignored for now, so un-ignore or export it before the portfolio.
+  - The 60-quote check from 19 Oct was a one-off script; it needs saving into the skill to be demoed.
+- **Jira:** SCRUM-74, SCRUM-71, SCRUM-57
+
+### Explain the work, Gibbs reflections, usability teachers' feedback
+- **Evidence now:** small commits I can walk through one by one, plus the work log's facts and problems tables as raw material.
+- **Still missing:**
+  - My Gibbs reflections.
+  - Feedback from the usability teachers, including the UI 102 exercise.
+  - A session explaining the code, database and architecture to peers.
+- **Jira:** SCRUM-42, SCRUM-56, SCRUM-41, SCRUM-67, SCRUM-59
+
+### Ikigai and sharing the workflow
+- **Evidence now:** the MCP storyline in the work log (for the demo).
+- **Still missing:**
+  - My Ikigai reflection (coding, full-stack skills, the educational need, a product for schools or with Omrin).
+  - The one-page workflow guide.
+  - The demo given to classmates.
+- **Jira:** SCRUM-76, SCRUM-72
