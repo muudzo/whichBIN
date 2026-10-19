@@ -4,8 +4,14 @@ CLAUDE.local.md
 .claude/
 claude-context/
 
+# AI-use log: kept local for now
+AI_USE_LOG.md
+
 # Learning goals (school documents, e.g. Learning-Goals-Sprint3-Which-Bin.docx, "learning goals .pdf")
 *[Ll]earning*[Gg]oals*
+
+# Lecture slides and other PDFs shared with Claude (e.g. UI102.pdf)
+*.pdf
 
 # Scraped reviews (make them again with: npm start)
 out/
