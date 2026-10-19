@@ -4,13 +4,13 @@ import type { Bin, BinId } from '@/domain/catalog'
 
 // Icon + Dutch name + English hint carry the meaning; the tint only helps.
 // Tints are game colours, not Omrin's lid colours (only the Sortibak's grey is confirmed).
-const BIN_STYLE: Record<BinId, { tint: string; Icon: LucideIcon }> = {
-  sortibak: { tint: 'bg-bin-sortibak', Icon: Trash2 },
-  biobak: { tint: 'bg-bin-biobak', Icon: Leaf },
-  papierbak: { tint: 'bg-bin-papierbak', Icon: Newspaper },
-  glasbak: { tint: 'bg-bin-glasbak', Icon: GlassWater },
-  textielbak: { tint: 'bg-bin-textielbak', Icon: Shirt },
-  'not-a-bin': { tint: 'bg-bin-not-a-bin', Icon: Signpost },
+const BIN_STYLE: Record<BinId, { body: string; lid: string; Icon: LucideIcon }> = {
+  sortibak: { body: 'bg-bin-sortibak', lid: 'bg-bin-sortibak-lid', Icon: Trash2 },
+  biobak: { body: 'bg-bin-biobak', lid: 'bg-bin-biobak-lid', Icon: Leaf },
+  papierbak: { body: 'bg-bin-papierbak', lid: 'bg-bin-papierbak-lid', Icon: Newspaper },
+  glasbak: { body: 'bg-bin-glasbak', lid: 'bg-bin-glasbak-lid', Icon: GlassWater },
+  textielbak: { body: 'bg-bin-textielbak', lid: 'bg-bin-textielbak-lid', Icon: Shirt },
+  'not-a-bin': { body: 'bg-bin-not-a-bin', lid: 'bg-bin-not-a-bin-lid', Icon: Signpost },
 }
 
 type Props = {
@@ -20,7 +20,7 @@ type Props = {
 }
 
 export function BinTarget({ bin, isDisabled = false, onSelect }: Props) {
-  const { tint, Icon } = BIN_STYLE[bin.id]
+  const { body, lid, Icon } = BIN_STYLE[bin.id]
 
   return (
     <motion.button
@@ -29,11 +29,13 @@ export function BinTarget({ bin, isDisabled = false, onSelect }: Props) {
       onClick={() => onSelect?.(bin.id)}
       whileTap={{ scale: 0.94 }}
       aria-label={`${bin.name}: ${bin.english}`}
-      className={`sticker flex min-h-[84px] short:min-h-[72px] short:py-1.5 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center shadow-sticker-sm ${tint} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
+      className={`sticker relative flex min-h-[84px] short:min-h-[72px] flex-col items-center justify-center gap-0.5 overflow-hidden px-1 pt-4 pb-2 short:pt-3.5 short:pb-1.5 text-center shadow-sticker-sm ${body} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
     >
+      {/* The lid: a darker band across the top, so the card reads as a bin */}
+      <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-2.5 border-b-[3px] border-ink ${lid}`} />
       <Icon className="size-5 text-ink" aria-hidden="true" />
       <span className="font-heading text-[15px] leading-tight font-extrabold">{bin.name}</span>
-      <span className="text-[13px] leading-tight text-ink-muted">{bin.english}</span>
+      <span className="text-[13px] leading-tight text-ink">{bin.english}</span>
     </motion.button>
   )
 }
