@@ -22,7 +22,7 @@ export function parseArgs(argv) {
   }
   return { appId, country };
 }
-
+//the address the scraper will be pointing to 
 export function feedUrl(page, { appId, country, fresh }) {
   const url = `https://itunes.apple.com/${country}/rss/customerreviews/page=${page}/id=${appId}/sortby=mostrecent/json`;
   return fresh ? `${url}?fresh=${fresh}` : url;
@@ -47,3 +47,29 @@ export async function fetchPage(page, options, fetchFn = fetch) {
     return { entries: [], problem: 'the reply was not valid JSON', status: response.status };
   }
 }
+
+export function toEntries(data) {
+  const entry = data?.feed?.entry;
+  if (!entry) return [];
+  const list = Array.isArray(entry) ? entry : [entry];
+  return list.filter((item) => item?.['im:rating']?.label);
+}
+
+const labelOf = (field) => field?.label ?? '';
+
+const ratingOf = (field) => {
+  const stars = Number.parseInt(labelOf(field), 10);
+  return Number.isInteger(stars) ? stars : null;
+};
+
+export function toRow(entry) {
+  return {
+    rating: ratingOf(entry['im:rating']),
+    version: labelOf(entry['im:version']),
+    date: labelOf(entry.updated).slice(0, 10), // "2026-10-13T09:18:34-07:00" → "2026-10-13"
+    title: labelOf(entry.title),
+    text: labelOf(entry.content),
+  };
+}
+
+const idOf = (entry) => labelOf(entry.id);
