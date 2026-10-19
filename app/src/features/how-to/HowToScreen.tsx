@@ -20,7 +20,7 @@ export function HowToScreen({ onStart, onBack }: Props) {
         <h1 className="font-heading text-3xl font-extrabold">How to play</h1>
       </header>
 
-      <ol className="flex flex-col gap-3 text-lg">
+      <ol className="flex flex-col gap-2.5 text-base tall:text-lg">
         <li className="sticker bg-paper px-4 py-3 shadow-sticker-sm">
           <strong>Tap the bin</strong> where each item goes in Leeuwarden.
         </li>

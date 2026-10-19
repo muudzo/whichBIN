@@ -53,7 +53,8 @@ describe('App', () => {
 
     await user.click(binButton(item, true))
 
-    expect(await screen.findByText(new RegExp(`Right! ${item.name}`))).toBeInTheDocument()
+    expect(await screen.findByText('Right!')).toBeInTheDocument()
+    expect(screen.getByText(`${item.name} → ${binFor(item.bin).name}`)).toBeInTheDocument()
     expect(screen.getByText('100')).toBeInTheDocument()
   })
 

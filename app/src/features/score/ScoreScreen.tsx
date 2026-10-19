@@ -100,9 +100,12 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
         )}
       </section>
 
-      <Button variant="secondary" size="lg" onClick={onNextRound} className="mt-auto">
-        {hasMistakes ? 'Next round: your mistakes come back' : 'Next round'}
-      </Button>
+      <div className="mt-auto flex flex-col gap-2">
+        <Button variant="secondary" size="lg" onClick={onNextRound}>
+          Next round
+        </Button>
+        {hasMistakes && <p className="text-center text-sm text-ink-muted">Your mistakes from this round come back.</p>}
+      </div>
     </main>
   )
 }
