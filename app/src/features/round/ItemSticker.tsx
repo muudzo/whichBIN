@@ -8,7 +8,8 @@ type Props = {
   tilt?: number
 }
 
-const SIZES = { md: 'size-28', lg: 'size-40' } as const
+// The sticker shrinks on short screens so the lives bar and all six bins always fit.
+const SIZES = { md: 'size-28', lg: 'size-32 short:size-24 short:p-3 tall:size-40' } as const
 
 export function ItemSticker({ item, size = 'lg', tilt = -3 }: Props) {
   const url = stickerFor(item.id)
@@ -24,7 +25,7 @@ export function ItemSticker({ item, size = 'lg', tilt = -3 }: Props) {
       <div className={`sticker grid place-items-center bg-paper p-5 ${SIZES[size]}`}>
         {url && <img src={url} alt="" width={96} height={96} className="size-full" draggable={false} />}
       </div>
-      <figcaption className="font-heading text-2xl font-extrabold">{item.name}</figcaption>
+      <figcaption className="text-center font-heading text-2xl font-extrabold short:text-xl">{item.name}</figcaption>
     </motion.figure>
   )
 }

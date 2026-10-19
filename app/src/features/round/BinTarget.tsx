@@ -29,7 +29,7 @@ export function BinTarget({ bin, isDisabled = false, onSelect }: Props) {
       onClick={() => onSelect?.(bin.id)}
       whileTap={{ scale: 0.94 }}
       aria-label={`${bin.name}: ${bin.english}`}
-      className={`sticker flex min-h-[84px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-center shadow-sticker-sm ${tint} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
+      className={`sticker flex min-h-[84px] short:min-h-[72px] short:py-1.5 flex-col items-center justify-center gap-0.5 px-1 py-2 text-center shadow-sticker-sm ${tint} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
     >
       <Icon className="size-5 text-ink" aria-hidden="true" />
       <span className="font-heading text-[15px] leading-tight font-extrabold">{bin.name}</span>
