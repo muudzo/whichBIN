@@ -73,3 +73,64 @@ export function toRow(entry) {
 }
 
 const idOf = (entry) => labelOf(entry.id);
+
+//wrap reviews with where and when they came from
+export function buildReport({ appId, country, rows, pagesRead, stoppedBecause, complete, scrapedAt }) {
+  return {
+    appId,
+    country,
+    source: feedUrl(1, { appId, country }),
+    scrapedAt,
+    pagesRead,
+    stoppedBecause,
+    complete,
+    count: rows.length,
+    reviews: rows,
+  };
+}
+
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const uniqueById = (entries) =>
+  entries.filter(
+    (entry, index) => idOf(entry) === '' || entries.findIndex((other) => idOf(other) === idOf(entry)) === index,
+  );
+
+
+export async function scrapeAll({
+  appId,
+  country,
+  maxPages = MAX_PAGES,
+  fetchFn = fetch,
+  wait = sleep,
+  fresh = Date.now(),
+}) {
+  let collected = [];
+
+  for (let page = 1; page <= maxPages; page += 1) {
+    const { entries, problem, status } = await fetchPage(page, { appId, country, fresh }, fetchFn);
+
+    if (problem) {
+      // HTTP 400 after at least one good page = Apple saying "no more pages".
+      // Anything else (HTTP 400 on page 1, 429, 500, network error) = cut short.
+      const isEndOfFeed = status === END_OF_FEED_STATUS && page > 1;
+      return finish(collected, page - 1, `page ${page}: ${problem}`, isEndOfFeed);
+    }
+    if (entries.length === 0) {
+      return finish(collected, page - 1, `page ${page} had no reviews`, true);
+    }
+
+    collected = [...collected, ...entries]; // a new list each time, not push()
+    if (page < maxPages) await wait(PAUSE_MS);
+  }
+
+  return finish(collected, maxPages, `reached the ${maxPages}-page limit`, true);
+}
+
+const finish = (entries, pagesRead, stoppedBecause, complete) => ({
+  rows: uniqueById(entries).map(toRow),
+  pagesRead,
+  stoppedBecause,
+  complete,
+  });
