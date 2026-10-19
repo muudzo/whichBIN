@@ -12,18 +12,26 @@
   --color-sky: #dce8fa;          /* light blue tint */
   --color-pompebled: #d7263d;    /* lives, "not quite" · white on it 5.0:1 */
   --color-meadow: #17703d;       /* right answers · white on it 6.1:1 */
+  --color-meadow-tint: #ddf1e4;  /* "Right!" card background · meadow text on it 5.2:1 */
   --color-sun: #ffc531;          /* score, streak, highlights · ink on it 9.9:1 · never text on cream */
   --color-cream: #fff8ec;        /* page background: not plain white */
   --color-paper: #ffffff;        /* cards and sheets */
   --color-sortibak: #8a9099;     /* the Sortibak's real colour: grey (Omrin guide p. 4) */
 
-  /* Bin tints: game colours, NOT Omrin's lid colours (only the Sortibak's grey is confirmed) */
-  --color-bin-sortibak: #e4e7eb;
-  --color-bin-biobak: #ddf1e4;
-  --color-bin-papierbak: #dce8fa;
-  --color-bin-glasbak: #d9f1ef;
-  --color-bin-textielbak: #fff0c2;
-  --color-bin-not-a-bin: #fbe0e3;
+  /* Bin colours: game colours, NOT Omrin's lid colours (only the Sortibak's grey is confirmed).
+     Ink text on each is at least 6:1. The darker "lid" shade is decoration only, never behind text. */
+  --color-bin-sortibak: #9ba3ad;      /* ink 6.2:1 */
+  --color-bin-sortibak-lid: #6e7782;
+  --color-bin-biobak: #4cc36e;        /* ink 7.0:1 */
+  --color-bin-biobak-lid: #2e9a50;
+  --color-bin-papierbak: #6fa8ff;     /* ink 6.5:1 */
+  --color-bin-papierbak-lid: #3e7fe0;
+  --color-bin-glasbak: #3ccbbe;       /* ink 7.8:1 */
+  --color-bin-glasbak-lid: #1e9e93;
+  --color-bin-textielbak: #ffa53d;    /* ink 8.0:1 · orange, so it doesn't clash with the yellow score */
+  --color-bin-textielbak-lid: #e07f12;
+  --color-bin-not-a-bin: #ff8a9b;     /* ink 7.0:1 */
+  --color-bin-not-a-bin-lid: #e05a6e;
 
   /* Type: two families, self-hosted */
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;

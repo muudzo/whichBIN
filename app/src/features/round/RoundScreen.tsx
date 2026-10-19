@@ -96,7 +96,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
             key={rightItem.id}
             initial={{ y: -8, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="sticker w-full bg-bin-biobak px-3 py-2 shadow-sticker-sm"
+            className="sticker w-full bg-meadow-tint px-3 py-2 shadow-sticker-sm"
           >
             <p className="flex items-center gap-1.5 text-sm font-bold text-meadow">
               <Check className="size-4 shrink-0" aria-hidden="true" />
