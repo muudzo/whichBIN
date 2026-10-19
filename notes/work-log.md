@@ -39,6 +39,7 @@
 | On the smallest iPhone (320 × 568) Play was below the screen, the lives bar scrolled off, and a button label stuck out sideways | Added screen-height variants (`short:` / `tall:`) and browser tests that check the lives bar and all six bins are fully on screen |
 | "Right! Textielbak" sat under the *next* item's name, so it read as that item's answer | The "Right!" card now sits above the sticker and names the item it's about |
 | The brand book scrolled 7px sideways on a phone | Found the element with a script (`box-sizing`) and fixed it before publishing |
+| Seeing the app running: the bin colours were too pale to notice | Gave each bin a strong colour plus a darker "lid" band, with ink text (at least 6:1). That made the "Right!" card, which borrowed the Biobak colour, hard to read, so it got its own light green token |
 | Still open: the JavaScript bundle is 192 KB gzipped | Within the 300 KB budget for an app page; trim later (zod, motion) |
 
 ### My reflection
