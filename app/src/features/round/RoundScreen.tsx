@@ -1,0 +1,131 @@
+import { Check } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { useState } from 'react'
+import type { BinId, Item } from '@/domain/catalog'
+import {
+  correctCount,
+  currentItem,
+  lastAnswer,
+  mistakes,
+  roundReducer,
+  startRound,
+  type RoundAction,
+  type RoundState,
+} from '@/domain/game'
+import { binFor, itemFor } from '@/features/game/catalog'
+import type { ItemStat, ScoreStore } from '@/services/scoreStore'
+import { BinGrid } from './BinGrid'
+import { Hud } from './Hud'
+import { ItemSticker } from './ItemSticker'
+import { NotQuiteSheet } from './NotQuiteSheet'
+
+export interface RoundResult {
+  roundNumber: number
+  score: number
+  correct: number
+  total: number
+  bestStreak: number
+  mistakes: Item[]
+}
+
+type Props = {
+  items: readonly Item[]
+  roundNumber: number
+  sessionId: string
+  store: ScoreStore
+  onFinish: (result: RoundResult) => void
+}
+
+function toResult(state: RoundState, roundNumber: number): RoundResult {
+  return {
+    roundNumber,
+    score: state.score,
+    correct: correctCount(state),
+    total: state.items.length,
+    bestStreak: state.bestStreak,
+    mistakes: mistakes(state),
+  }
+}
+
+export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: Props) {
+  const [state, setState] = useState(() => startRound(items))
+  const [stat, setStat] = useState<ItemStat>()
+  const [hasSaveError, setHasSaveError] = useState(false)
+  // True while the old item animates out. Taps wait, so an answer always belongs to the item on screen.
+  const [isSwapping, setIsSwapping] = useState(false)
+
+  const item = currentItem(state)
+  const answer = lastAnswer(state)
+  const answeredItem = answer ? itemFor(answer.itemId) : undefined
+  const rightItem = answer?.correct ? answeredItem : undefined
+  const wrongItem = answer && !answer.correct ? answeredItem : undefined
+
+  function apply(action: RoundAction) {
+    const next = roundReducer(state, action)
+    setState(next)
+    if (next.phase === 'sorting' && next.index !== state.index) setIsSwapping(true)
+    if (next.phase === 'over') onFinish(toResult(next, roundNumber))
+  }
+
+  function handleSelect(bin: BinId) {
+    if (!item || state.phase !== 'sorting' || isSwapping) return
+    const correct = item.bin === bin
+    setStat(undefined)
+    store
+      .submitAnswer({ sessionId, round: roundNumber, itemId: item.id, chosenBin: bin, correct })
+      .then(() => (!correct && store.isShared ? store.itemStat(item.id).then(setStat) : undefined))
+      .catch(() => setHasSaveError(true))
+    apply({ type: 'answer', bin })
+  }
+
+  return (
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <Hud
+        lives={state.lives}
+        score={state.score}
+        streak={state.streak}
+        itemNumber={Math.min(state.index + 1, state.items.length)}
+        itemCount={state.items.length}
+      />
+
+      <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center gap-4">
+        <AnimatePresence mode="wait" onExitComplete={() => setIsSwapping(false)}>
+          {item && <ItemSticker key={item.id} item={item} />}
+        </AnimatePresence>
+
+        <div aria-live="polite" className="min-h-16 text-center">
+          {rightItem && state.phase === 'sorting' ? (
+            <motion.p
+              key={rightItem.id}
+              initial={{ y: 8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="flex flex-col items-center gap-0.5"
+            >
+              <span className="flex items-center gap-1 font-heading text-lg font-extrabold text-meadow">
+                <Check className="size-5" aria-hidden="true" /> Right! {rightItem.name} → {binFor(rightItem.bin).name}
+              </span>
+              <span className="text-sm text-ink-muted">{rightItem.why}</span>
+            </motion.p>
+          ) : (
+            <p className="text-ink-muted">Tap the bin where it goes in Leeuwarden</p>
+          )}
+        </div>
+      </section>
+
+      <BinGrid isDisabled={state.phase !== 'sorting' || isSwapping} onSelect={handleSelect} />
+
+      {hasSaveError && (
+        <p role="status" className="text-center text-sm text-ink-muted">
+          Your answers couldn&apos;t be saved. You can keep playing.
+        </p>
+      )}
+
+      <NotQuiteSheet
+        item={wrongItem}
+        stat={stat}
+        isOpen={state.phase === 'feedback'}
+        onContinue={() => apply({ type: 'continue' })}
+      />
+    </main>
+  )
+}
