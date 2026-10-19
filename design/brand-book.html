@@ -18,12 +18,14 @@
     --cream: #fff8ec;
     --paper: #ffffff;
     --grey: #8a9099;
-    --bin-sortibak: #e4e7eb;
-    --bin-biobak: #ddf1e4;
-    --bin-papierbak: #dce8fa;
-    --bin-glasbak: #d9f1ef;
-    --bin-textielbak: #fff0c2;
-    --bin-not-a-bin: #fbe0e3;
+    --meadow-tint: #ddf1e4;
+    --pink-tint: #fbe0e3;
+    --bin-sortibak: #9ba3ad;
+    --bin-biobak: #4cc36e;
+    --bin-papierbak: #6fa8ff;
+    --bin-glasbak: #3ccbbe;
+    --bin-textielbak: #ffa53d;
+    --bin-not-a-bin: #ff8a9b;
     --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
     --body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -111,7 +113,7 @@
   .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .card { padding: 22px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .card .label { font-family: var(--display); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); }
-  .card.warn { background: var(--bin-not-a-bin); }
+  .card.warn { background: var(--pink-tint); }
 
   /* Colour */
   .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
@@ -123,9 +125,10 @@
   .swatch .role { font-size: 0.95rem; }
   .ratio { align-self: flex-start; margin-top: 6px; font-size: 0.8rem; font-weight: 700; border: 2px solid var(--ink); border-radius: 999px; padding: 1px 10px; background: var(--paper); font-variant-numeric: tabular-nums; }
   .tints { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
-  .tint { border: 3px solid var(--ink); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tint { position: relative; overflow: hidden; border: 3px solid var(--ink); border-radius: 14px; padding: 20px 10px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tint::before, .bin::before { content: ""; position: absolute; inset: 0 0 auto; height: 10px; border-bottom: 3px solid var(--ink); background: var(--lid); }
   .tint b { font-family: var(--display); font-size: 0.95rem; }
-  .tint span { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-muted); }
+  .tint span { font-family: var(--mono); font-size: 0.75rem; color: var(--ink); }
 
   /* Type */
   .specimens { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -171,10 +174,10 @@
 
   /* Bins */
   .bins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 460px; }
-  .bin { border: 3px solid var(--ink); border-radius: var(--radius); box-shadow: var(--shadow-sm); min-height: 96px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; min-width: 0; }
+  .bin { position: relative; overflow: hidden; border: 3px solid var(--ink); border-radius: var(--radius); box-shadow: var(--shadow-sm); min-height: 96px; padding: 20px 6px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; min-width: 0; }
   .bin svg { width: 22px; height: 22px; }
   .bin b { font-family: var(--display); font-weight: 800; font-size: 1rem; line-height: 1.1; }
-  .bin span { font-size: 0.8rem; color: var(--ink-muted); line-height: 1.2; }
+  .bin span { font-size: 0.8rem; color: var(--ink); line-height: 1.2; }
   .bins-row { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 32px; align-items: start; }
 
   /* Stickers */
@@ -202,9 +205,9 @@
   .voice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .say { padding: 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .say .tag { align-self: flex-start; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 999px; padding: 2px 10px; border: 2px solid var(--ink); }
-  .say.do { background: var(--bin-biobak); }
+  .say.do { background: var(--meadow-tint); }
   .say.do .tag { background: var(--meadow); color: var(--paper); }
-  .say.dont { background: var(--bin-not-a-bin); }
+  .say.dont { background: var(--pink-tint); }
   .say.dont .tag { background: var(--paper); color: var(--red); }
   .say q { font-family: var(--display); font-weight: 700; font-size: 1.15rem; quotes: "\201C" "\201D"; }
 
@@ -299,16 +302,16 @@
       <div class="sticker swatch"><div class="chip" style="background: var(--cream); color: var(--ink);">Aa</div><div class="meta"><p class="name">Cream</p><p class="hex">--color-cream · #FFF8EC</p><p class="role">Page background</p><p class="ratio">6.8 : 1 muted ink on cream</p></div></div>
       <div class="sticker swatch"><div class="chip" style="background: var(--grey); color: var(--ink);">Aa</div><div class="meta"><p class="name">Sortibak grey</p><p class="hex">--color-sortibak · #8A9099</p><p class="role">The Sortibak's real colour (Omrin guide, p. 4)</p><p class="ratio">4.9 : 1 ink on grey</p></div></div>
     </div>
-    <h3>Bin tints</h3>
+    <h3>Bin colours</h3>
     <div class="tints">
-      <div class="tint" style="background: var(--bin-sortibak);"><b>Sortibak</b><span>#E4E7EB</span></div>
-      <div class="tint" style="background: var(--bin-biobak);"><b>Biobak</b><span>#DDF1E4</span></div>
-      <div class="tint" style="background: var(--bin-papierbak);"><b>Papierbak</b><span>#DCE8FA</span></div>
-      <div class="tint" style="background: var(--bin-glasbak);"><b>Glasbak</b><span>#D9F1EF</span></div>
-      <div class="tint" style="background: var(--bin-textielbak);"><b>Textielbak</b><span>#FFF0C2</span></div>
-      <div class="tint" style="background: var(--bin-not-a-bin);"><b>Not a bin</b><span>#FBE0E3</span></div>
+      <div class="tint" style="background: var(--bin-sortibak); --lid: #6e7782;"><b>Sortibak</b><span>#9BA3AD</span></div>
+      <div class="tint" style="background: var(--bin-biobak); --lid: #2e9a50;"><b>Biobak</b><span>#4CC36E</span></div>
+      <div class="tint" style="background: var(--bin-papierbak); --lid: #3e7fe0;"><b>Papierbak</b><span>#6FA8FF</span></div>
+      <div class="tint" style="background: var(--bin-glasbak); --lid: #1e9e93;"><b>Glasbak</b><span>#3CCBBE</span></div>
+      <div class="tint" style="background: var(--bin-textielbak); --lid: #e07f12;"><b>Textielbak</b><span>#FFA53D</span></div>
+      <div class="tint" style="background: var(--bin-not-a-bin); --lid: #e05a6e;"><b>Not a bin</b><span>#FF8A9B</span></div>
     </div>
-    <p class="note">These are game colours, not Omrin's lid colours. The icon and the Dutch name carry the meaning; the tint only helps tell six cards apart. Real lid colours are a question for Omrin.</p>
+    <p class="note">Strong colours so the six targets stand out; ink text on each is at least 6 : 1. A darker lid band across the top makes each card read as a bin. The Textielbak is orange so it doesn't clash with the yellow score. These are still game colours, not Omrin's lid colours: the icon and the Dutch name carry the meaning, and real lid colours are a question for Omrin.</p>
   </section>
 
   <section class="section" aria-labelledby="type">
@@ -394,12 +397,12 @@
     </div>
     <div class="bins-row">
       <div class="bins">
-        <div class="bin" style="background: var(--bin-sortibak);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><b>Sortibak</b><span>grey bin, residual</span></div>
-        <div class="bin" style="background: var(--bin-biobak);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20"/><path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13"/></svg><b>Biobak</b><span>food, organic</span></div>
-        <div class="bin" style="background: var(--bin-papierbak);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/></svg><b>Papierbak</b><span>paper, cardboard</span></div>
-        <div class="bin" style="background: var(--bin-glasbak);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.116 4.104A1 1 0 0 1 6.11 3h11.78a1 1 0 0 1 .994 1.105L17.19 20.21A2 2 0 0 1 15.2 22H8.8a2 2 0 0 1-2-1.79z"/><path d="M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0"/></svg><b>Glasbak</b><span>glass, on the street</span></div>
-        <div class="bin" style="background: var(--bin-textielbak);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg><b>Textielbak</b><span>clothes, on the street</span></div>
-        <div class="bin" style="background: var(--bin-not-a-bin);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/></svg><b>Not a bin</b><span>it goes elsewhere</span></div>
+        <div class="bin" style="background: var(--bin-sortibak); --lid: #6e7782;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><b>Sortibak</b><span>grey bin, residual</span></div>
+        <div class="bin" style="background: var(--bin-biobak); --lid: #2e9a50;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 20a10 10 0 0010-10 25.9 25.9 0 00-1.04-7.281 1 1 0 00-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0011 20"/><path d="M2 21a5 5 0 012.911-4.544C7.613 15.212 8.351 15.24 11 13"/></svg><b>Biobak</b><span>food, organic</span></div>
+        <div class="bin" style="background: var(--bin-papierbak); --lid: #3e7fe0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18h-5"/><path d="M18 14h-8"/><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0v-9a2 2 0 0 1 2-2h2"/><rect width="8" height="4" x="10" y="6" rx="1"/></svg><b>Papierbak</b><span>paper, cardboard</span></div>
+        <div class="bin" style="background: var(--bin-glasbak); --lid: #1e9e93;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.116 4.104A1 1 0 0 1 6.11 3h11.78a1 1 0 0 1 .994 1.105L17.19 20.21A2 2 0 0 1 15.2 22H8.8a2 2 0 0 1-2-1.79z"/><path d="M6 12a5 5 0 0 1 6 0 5 5 0 0 0 6 0"/></svg><b>Glasbak</b><span>glass, on the street</span></div>
+        <div class="bin" style="background: var(--bin-textielbak); --lid: #e07f12;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg><b>Textielbak</b><span>clothes, on the street</span></div>
+        <div class="bin" style="background: var(--bin-not-a-bin); --lid: #e05a6e;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 13v8"/><path d="M12 3v3"/><path d="M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z"/></svg><b>Not a bin</b><span>it goes elsewhere</span></div>
       </div>
       <div class="sticker sm card">
         <p class="label">From test 1</p>
