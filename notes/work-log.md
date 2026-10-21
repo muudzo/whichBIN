@@ -99,3 +99,20 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 - *Analysis:* Why did testers read the greyscale prototype as "an app"? What in the new brand answers that, and what hasn't been tested yet?
 - *Analysis:* What caused the wrong-folder mix-up, and what does it teach me about giving an AI the right context?
 - *Conclusion and action plan:* Which usability checks were new to me, and what will I do differently tomorrow (Figma reads, commits, testing on a real phone)?
+
+---
+
+## Tue 20 Oct 2026
+
+### What we did
+- **Jira corrected** (evening): SCRUM-29 (drag and drop still to do) and SCRUM-31 (city screens not built) back to In Progress, SCRUM-27 (not deployed) back to To Do, SCRUM-24 (test 1) to Done, SCRUM-74 (agent skill 1, to review) to In Progress. SCRUM-75 now points to `app/src/services/scoreStore.ts`.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| On 19 Oct Claude marked SCRUM-28 to SCRUM-31 Done using a prototype in a different folder, not this repo | Checked each ticket against `app/` and reset the statuses; corrected Claude's comments on SCRUM-27 and SCRUM-29 |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:
