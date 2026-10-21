@@ -77,6 +77,40 @@ test('a right answer scores, a wrong answer explains why with the source', async
   await expect(page.getByRole('img', { name: '2 of 3 lives left' })).toBeVisible()
 })
 
+// Press on the sticker, move in small steps like a finger, and let go at `to`.
+async function dragItemTo(page: Page, to: { x: number; y: number }) {
+  const from = await itemFigure(page).boundingBox()
+  if (!from) throw new Error('No item on screen to drag')
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(to.x, to.y, { steps: 12 })
+  await page.mouse.up()
+}
+
+test('dragging the item onto its bin sorts it', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const bin = await binButton(page, item.bin).boundingBox()
+  if (!bin) throw new Error(`Bin ${item.bin} not on screen`)
+
+  await dragItemTo(page, { x: bin.x + bin.width / 2, y: bin.y + bin.height / 2 })
+
+  await expect(page.getByText(/Right!/)).toBeVisible()
+  await expect(page.getByText('Item 2 of 10')).toBeVisible()
+})
+
+test('dropping the item outside the bins puts it back without answering', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const lives = page.getByRole('img', { name: '3 of 3 lives left' })
+
+  await dragItemTo(page, { x: 10, y: 10 })
+
+  await expect(itemFigure(page)).toHaveText(item.name)
+  await expect(page.getByText('Item 1 of 10')).toBeVisible()
+  await expect(lives).toBeVisible()
+})
+
 test('the score screen fits sideways after a full round', async ({ page }) => {
   await startRound(page)
   for (let i = 0; i < 10; i += 1) {

@@ -16,20 +16,24 @@ const BIN_STYLE: Record<BinId, { body: string; lid: string; Icon: LucideIcon }> 
 type Props = {
   bin: Bin
   isDisabled?: boolean
+  // True while an item is dragged over this bin: it grows and gets a thick outline, so the player sees where it will land.
+  isHighlighted?: boolean
   onSelect?: (id: BinId) => void
 }
 
-export function BinTarget({ bin, isDisabled = false, onSelect }: Props) {
+export function BinTarget({ bin, isDisabled = false, isHighlighted = false, onSelect }: Props) {
   const { body, lid, Icon } = BIN_STYLE[bin.id]
 
   return (
     <motion.button
       type="button"
+      data-bin-id={bin.id}
       disabled={isDisabled || !onSelect}
       onClick={() => onSelect?.(bin.id)}
+      animate={{ scale: isHighlighted ? 1.08 : 1 }}
       whileTap={{ scale: 0.94 }}
       aria-label={`${bin.name}: ${bin.english}`}
-      className={`sticker relative flex min-h-[84px] short:min-h-[72px] flex-col items-center justify-center gap-0.5 overflow-hidden px-1 pt-4 pb-2 short:pt-3.5 short:pb-1.5 text-center shadow-sticker-sm ${body} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
+      className={`sticker relative flex min-h-[84px] short:min-h-[72px] flex-col items-center justify-center gap-0.5 overflow-hidden px-1 pt-4 pb-2 short:pt-3.5 short:pb-1.5 text-center shadow-sticker-sm ${body} ${isHighlighted ? 'ring-4 ring-ink' : ''} focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none disabled:cursor-default`}
     >
       {/* The lid: a darker band across the top, so the card reads as a bin */}
       <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-2.5 border-b-[3px] border-ink ${lid}`} />
