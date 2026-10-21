@@ -22,7 +22,7 @@ export function HowToScreen({ onStart, onBack }: Props) {
 
       <ol className="flex flex-col gap-2.5 text-base tall:text-lg">
         <li className="sticker bg-paper px-4 py-3 shadow-sticker-sm">
-          <strong>Tap the bin</strong> where each item goes in Leeuwarden.
+          <strong>Drag each item</strong> into the bin where it goes in Leeuwarden, or tap the bin.
         </li>
         <li className="sticker flex items-center gap-3 bg-paper px-4 py-3 shadow-sticker-sm">
           <span className="flex shrink-0 gap-0.5" aria-hidden="true">

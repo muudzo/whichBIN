@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { BinId, Item } from '@/domain/catalog'
 import {
   correctCount,
@@ -15,6 +15,7 @@ import {
 import { binFor, itemFor } from '@/features/game/catalog'
 import type { ItemStat, ScoreStore } from '@/services/scoreStore'
 import { BinGrid } from './BinGrid'
+import { measureTargets, targetAt, type Point } from './dropTarget'
 import { Hud } from './Hud'
 import { ItemSticker } from './ItemSticker'
 import { NotQuiteSheet } from './NotQuiteSheet'
@@ -53,8 +54,12 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
   const [hasSaveError, setHasSaveError] = useState(false)
   // True while the old item animates out. Taps wait, so an answer always belongs to the item on screen.
   const [isSwapping, setIsSwapping] = useState(false)
+  // The bin under the finger while an item is dragged, so it can light up.
+  const [hoveredBin, setHoveredBin] = useState<BinId>()
+  const binsRef = useRef<HTMLDivElement>(null)
 
   const item = currentItem(state)
+  const isAnswerable = state.phase === 'sorting' && !isSwapping
   const answer = lastAnswer(state)
   const answeredItem = answer ? itemFor(answer.itemId) : undefined
   const rightItem = answer?.correct ? answeredItem : undefined
@@ -76,6 +81,18 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
       .then(() => (!correct && store.isShared ? store.itemStat(item.id).then(setStat) : undefined))
       .catch(() => setHasSaveError(true))
     apply({ type: 'answer', bin })
+  }
+
+  // Bins are measured at the moment of the drag, so the check stays right after a resize or rotation.
+  function binAt(point: Point) {
+    return binsRef.current ? targetAt(point, measureTargets<BinId>(binsRef.current)) : undefined
+  }
+
+  // A drop on a bin counts exactly like a tap on that bin. Dropped anywhere else, nothing is answered.
+  function handleDrop(point: Point) {
+    setHoveredBin(undefined)
+    const bin = binAt(point)
+    if (bin) handleSelect(bin)
   }
 
   return (
@@ -108,17 +125,24 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
             <p className="line-clamp-2 text-[13px] leading-snug text-ink-muted">{rightItem.why}</p>
           </motion.div>
         ) : (
-          <p className="text-center text-ink-muted">Tap the bin where it goes in Leeuwarden</p>
+          <p className="text-center text-ink-muted">Drag it to its bin in Leeuwarden, or tap the bin</p>
         )}
       </div>
 
       <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center">
         <AnimatePresence mode="wait" onExitComplete={() => setIsSwapping(false)}>
-          {item && <ItemSticker key={item.id} item={item} />}
+          {item && (
+            <ItemSticker
+              key={item.id}
+              item={item}
+              onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
+              onDrop={isAnswerable ? handleDrop : undefined}
+            />
+          )}
         </AnimatePresence>
       </section>
 
-      <BinGrid isDisabled={state.phase !== 'sorting' || isSwapping} onSelect={handleSelect} />
+      <BinGrid ref={binsRef} isDisabled={!isAnswerable} highlighted={hoveredBin} onSelect={handleSelect} />
 
       {hasSaveError && (
         <p role="status" className="text-center text-sm text-ink-muted">
