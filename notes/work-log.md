@@ -116,3 +116,23 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 - What went well:
 - What was hard:
 - What I'd do differently:
+
+---
+
+## Wed 21 Oct 2026
+
+### What we did
+- **Final-push plan agreed** (evening): what fits before Friday morning, by day with Jira keys, and what to drop. Saved as `notes/plans/2026-10-21-final-push.md`, git-ignored on request (`501ca30`).
+- **Drag and drop, step 1** (SCRUM-29): the "which bin is under the finger?" check as two plain functions, `targetAt` and `measureTargets` (`app/src/features/round/dropTarget.ts`), with 5 tests written first (`a280644`). 51 unit tests pass.
+- **How-to guide** for finishing the goals while learning: `notes/how-to-learn-while-building.md`.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| No commits or logged progress on Tue 20 and most of Wed 21, two days before the deadline | Cut the plan to what Friday can't do without; dropped the UI 102 exercise, city screens, mid-fi v2, validation sessions and the classmate demo |
+| Deploying to Cloudflare Pages needs a login only the student can do | Asked the student to run `npx wrangler login`; drag and drop started in the meantime |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:
