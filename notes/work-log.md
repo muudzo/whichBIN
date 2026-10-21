@@ -124,13 +124,17 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 ### What we did
 - **Final-push plan agreed** (evening): what fits before Friday morning, by day with Jira keys, and what to drop. Saved as `notes/plans/2026-10-21-final-push.md`, git-ignored on request (`501ca30`).
 - **Drag and drop, step 1** (SCRUM-29): the "which bin is under the finger?" check as two plain functions, `targetAt` and `measureTargets` (`app/src/features/round/dropTarget.ts`), with 5 tests written first (`a280644`). 51 unit tests pass.
-- **How-to guide** for finishing the goals while learning: `notes/how-to-learn-while-building.md`.
+- **How-to guide** for finishing the goals while learning: `notes/how-to-learn-while-building.md` (git-ignored on request, `bb4c251`).
+- **Drag and drop, step 2** (SCRUM-29, now Done): the item sticker can be dragged onto a bin; the bin under the finger grows and gets an outline; a drop on a bin counts exactly like a tap; dropped anywhere else, the item springs back without answering. Tapping still works. The hint texts now say "drag or tap" (`7bf71da`). Two browser tests written first (drag onto the right bin; drop outside the bins) pass on all four phone sizes. Screen captures refreshed (`e293479`); `notes/evidence-map.md` updated.
 
 ### Problems and how we solved them
 | Problem | How we solved it |
 |---|---|
 | No commits or logged progress on Tue 20 and most of Wed 21, two days before the deadline | Cut the plan to what Friday can't do without; dropped the UI 102 exercise, city screens, mid-fi v2, validation sessions and the classmate demo |
 | Deploying to Cloudflare Pages needs a login only the student can do | Asked the student to run `npx wrangler login`; drag and drop started in the meantime |
+| The drag library reports the finger's position on the page, but the bins' positions are measured on the screen | Converted the page position to a screen position (subtract the scroll) before checking which bin is under the finger |
+| The bins were drawn after the item, so a dragged item would slide under them | The item gets a higher layer while it's dragged (`zIndex` in `whileDrag`) |
+| SCRUM-29's description also asks for rounds that get faster, which this app doesn't have | Not in the learning goals PDF, so left out; noted on the ticket |
 
 ### My reflection
 - What went well:
