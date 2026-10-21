@@ -2,13 +2,13 @@
 
 > A living list. For each line of my learning goals (`learning goals2026P1.pdf`) it shows what proves it, where that lives, how to show it in about a minute, and what's still missing. Update it whenever a deliverable lands. It lists facts only; whether the evidence is enough is for me and the assessors to judge.
 
-**Status:** Mon 19 Oct 2026 · deadline Fri 23 Oct (morning)
+**Status:** Wed 21 Oct 2026 · deadline Fri 23 Oct (morning)
 
 ## Showcase list: the headline demos
 
 1. **Before and after.** Show Mid-fi v3 screens A1 (welcome) and C2 (round) beside the coded `design/screens/01-welcome.png` and `design/screens/03-round.png`. Export the two Figma frames from the Figma app, which uses none of the connector's reads, into `design/before-after/`.
 2. **Live on a phone.** Play one round, get one wrong to show "Not quite" with the Omrin page, then open the leaderboard.
-3. **Tests running.** `npm test` (46 unit tests) and `npm run test:e2e` (17 browser tests on four phone sizes). Testing found real problems:
+3. **Tests running.** `npm test` (51 unit tests) and `npm run test:e2e` (browser tests on four phone sizes, 25 passing runs). Testing found real problems:
    - The app tests caught a timing bug: a fast tap answered the next item (fixed in `a8306e6`).
    - The screenshots showed that on the smallest iPhone, Play sat below the screen and the lives bar scrolled away. This was fixed in `ce0931d`, and a browser test now checks it.
 4. **The commit history.** `git log --oneline main..feat/app-boilerplate` gives one small step per commit, a trace of how the app was built.
@@ -54,12 +54,12 @@
 
 ### Frontend
 - **Evidence now:**
+  - Touch drag and drop (21 Oct): drag the item onto a bin, and the bin under the finger lights up. Tapping still works. The drop check is two plain functions with 5 tests (`app/src/features/round/dropTarget.ts`).
   - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
-  - 46 unit tests and 17 browser tests on four phone sizes.
+  - 51 unit tests, and browser tests on four phone sizes (25 passing runs), including dragging onto a bin and dropping outside the bins.
   - The game rules are plain, tested functions (`app/src/domain/game.ts`).
-- **Show it:** showcases 2 and 3, then walk through `roundReducer` in `app/src/domain/game.ts`: what happens on a right answer, a wrong answer and "continue".
+- **Show it:** showcases 2 and 3, then walk through `roundReducer` in `app/src/domain/game.ts`: what happens on a right answer, a wrong answer and "continue". For drag and drop, explain `targetAt` in `dropTarget.ts` (how a drop becomes the same answer as a tap).
 - **Still missing:**
-  - Touch drag and drop.
   - Round-end motion.
   - A check on a real phone, with a note of which phone.
 - **Jira:** SCRUM-32
