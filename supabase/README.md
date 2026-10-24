@@ -117,3 +117,4 @@ Both functions: `security definer`, `set search_path = ''`, and browsers may exe
 - `npm run db:apply` applies each new file in `migrations/` once, then copies the items from `items.json` and checks they match.
 - `npm run db:test` prints each test as it runs. It stops at the first failure with a `FAIL:` line and a hint, and always undoes its test rows.
 - **Changed `001` after applying it?** While nothing is live: `npm run db:reset -- --yes`, then `npm run db:apply`. Once the game is live, never reset; add a new file such as `002_….sql` instead.
+- **On GitHub**, CI applies every migration to a throwaway Postgres and runs the same tests on each push to `main` and each pull request. It never touches the real project; `tests/ci-setup.sql` gives it Supabase's browser roles. See `docs/ci.md`.
