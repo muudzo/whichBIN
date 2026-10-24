@@ -2,7 +2,7 @@
 
 > A living list. For each line of my learning goals (`learning goals2026P1.pdf`) it shows what proves it, where that lives, how to show it in about a minute, and what's still missing. Update it whenever a deliverable lands. It lists facts only; whether the evidence is enough is for me and the assessors to judge.
 
-**Status:** Wed 21 Oct 2026 · deadline Fri 23 Oct (morning)
+**Status:** Sat 24 Oct 2026 · deadline Fri 23 Oct (morning)
 
 ## Showcase list: the headline demos
 
@@ -48,8 +48,11 @@
 - **Jira:** SCRUM-26
 
 ### Architecture diagrams
-- **Evidence now:** the score store interface (`app/src/services/scoreStore.ts`) defines what the backend must do. The diagrams can follow it.
-- **Still missing:** both diagrams: the application, and answer submission → storage → database.
+- **Evidence now:** both diagrams, drawn by me in Mermaid (`design/architecture/`, `3e35ea1`): the application (flowchart) and answer submission → storage → database (sequence diagram). The database was built from them.
+- **Show it:** open them on GitHub, then follow one answer from the tap to `public.answers` in the SQL file.
+- **Still missing:**
+  - Updates where the build differs: no Players table; the counts are worked out when asked; the items are also in the database; after a wrong answer the game asks for that item's counts, not the leaderboard.
+  - PNG or SVG exports for the portfolio.
 - **Jira:** SCRUM-75
 
 ### Frontend
@@ -65,16 +68,17 @@
 - **Jira:** SCRUM-32
 
 ### Backend and database (Supabase)
-- **Evidence now:** none yet. The app is ready for it: `createLocalScoreStore()` gets swapped for a Supabase store with the same interface.
-- **Still missing:**
-  - Tables for players and answers.
-  - Aggregate scores.
-  - Row level security: inserting answers is allowed; changing or deleting them is not.
-  - A test that proves the client can't update or delete.
+- **Evidence now:**
+  - A Supabase project in Frankfurt (EU), 24 Oct.
+  - My SQL, `supabase/migrations/001_tables_and_permissions.sql`: the `items`, `answers` and `scores` tables with checks (real items and bins only, generated nicknames only, possible scores only); browsers' rights taken away, then insert on answers and insert and select on scores given back; row level security; the counts `item_stat` and `most_missed`.
+  - The database decides right or wrong: the counts compare each answer with the `items` table, which `npm run db:apply` copies from `items.json` and checks.
+  - 16 permission tests pass against the live project (`npm run db:test`, `supabase/tests/permissions.sql`). They prove browsers can't read individual answers or change or delete anything, and they undo their own rows.
+- **Show it:** run `npm run db:test` live, then walk through one grant, one policy and `item_stat` in the SQL file.
+- **Still missing:** the game connected to the database (the Supabase score store), and the privacy line (SCRUM-54).
 - **Jira:** SCRUM-51, SCRUM-52, SCRUM-53, SCRUM-54
 
 ### Integrate, test, deploy
-- **Evidence now:** none yet.
+- **Evidence now:** CI on GitHub Actions (`.github/workflows/ci.yml`, `docs/ci.md`): every push to `main` and every pull request runs the root tests, the app's lint, type check, unit tests and build, and the 16 database permission tests on a throwaway Postgres. Checked locally; not yet run on GitHub.
 - **Still missing:** the frontend connected to Supabase, tests of submissions, scores and permissions, and a public link (Cloudflare Pages).
 - **Jira:** SCRUM-27
 
