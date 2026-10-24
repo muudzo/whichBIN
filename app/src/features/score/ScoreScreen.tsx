@@ -38,12 +38,13 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div aria-hidden="true" className="stripes -mx-4 h-5 border-b-[3px] border-ink" />
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-12 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+      {/* The Frisian flag's stripes, across the full width of the screen at any size */}
+      <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 
       <header className="flex flex-col items-center gap-1 text-center">
-        <h1 className="font-heading text-2xl font-bold">Round {result.roundNumber} complete</h1>
-        <p className="font-heading text-7xl font-extrabold tabular-nums">
+        <h1 className="font-heading text-title font-bold">Round {result.roundNumber} complete</h1>
+        <p className="font-heading text-display font-extrabold tabular-nums">
           {result.correct}
           <span className="text-ink-muted"> / {result.total}</span>
         </p>
@@ -54,30 +55,30 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
 
       {hasMistakes ? (
         <section aria-labelledby="learn-title" className="flex flex-col gap-2">
-          <h2 id="learn-title" className="font-heading text-lg font-bold">
+          <h2 id="learn-title" className="font-heading text-title font-bold">
             Learn from these
           </h2>
           <ul className="flex flex-col gap-2">
             {result.mistakes.map((item) => (
-              <li key={item.id} className="sticker bg-paper px-4 py-3 shadow-sticker-sm">
+              <li key={item.id} className="sticker bg-paper p-4 shadow-sticker-sm">
                 <p className="font-bold">
                   {item.name} → {item.where ?? binFor(item.bin).name}
                 </p>
-                <p className="text-sm text-ink-muted">{item.why}</p>
+                <p className="text-small text-ink-muted">{item.why}</p>
               </li>
             ))}
           </ul>
         </section>
       ) : (
-        <p className="sticker bg-sun px-4 py-3 text-center font-bold shadow-sticker-sm">Perfect round! No mistakes.</p>
+        <p className="sticker bg-sun p-4 text-center font-bold shadow-sticker-sm">Perfect round! No mistakes.</p>
       )}
 
-      <section aria-labelledby="save-title" className="sticker flex flex-col gap-3 bg-sky px-4 py-4 shadow-sticker-sm">
-        <h2 id="save-title" className="font-heading text-lg font-bold">
+      <section aria-labelledby="save-title" className="sticker flex flex-col gap-4 bg-sky p-4 shadow-sticker-sm">
+        <h2 id="save-title" className="font-heading text-title font-bold">
           Save to the leaderboard as
         </h2>
         <div className="flex items-center justify-between gap-2">
-          <span className="font-heading text-xl font-extrabold" data-testid="nickname">
+          <span className="font-heading text-title font-extrabold" data-testid="nickname">
             {nickname}
           </span>
           <Button
@@ -89,12 +90,12 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
             <Shuffle />
           </Button>
         </div>
-        <p className="text-sm text-ink-muted">Names are made up, so nothing about you is saved.</p>
+        <p className="text-small text-ink-muted">Names are made up, so nothing about you is saved.</p>
         <Button onClick={handleSave} disabled={status === 'saving'}>
           {status === 'saving' ? 'Saving…' : 'Save score'}
         </Button>
         {status === 'error' && (
-          <p role="alert" className="text-sm font-bold text-pompebled">
+          <p role="alert" className="text-small font-bold text-pompebled">
             Couldn&apos;t save your score. Try again in a moment.
           </p>
         )}
@@ -104,7 +105,7 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
         <Button variant="secondary" size="lg" onClick={onNextRound}>
           Next round
         </Button>
-        {hasMistakes && <p className="text-center text-sm text-ink-muted">Your mistakes from this round come back.</p>}
+        {hasMistakes && <p className="text-center text-small text-ink-muted">Your mistakes from this round come back.</p>}
       </div>
     </main>
   )

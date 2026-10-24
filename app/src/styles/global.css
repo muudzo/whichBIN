@@ -9,6 +9,8 @@
 /* Screen-height variants: `short:` for small phones (e.g. iPhone SE 1st gen, 568px), `tall:` for big ones. */
 @custom-variant short (@media (max-height: 640px));
 @custom-variant tall (@media (min-height: 740px));
+/* A phone held sideways: wide but at most 500px tall. The round screen goes side by side there. */
+@custom-variant landscape-phone (@media (orientation: landscape) and (max-height: 500px));
 
 @theme inline {
   --font-sans: var(--font-body);

@@ -96,7 +96,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 landscape-phone:max-w-3xl landscape-phone:gap-2 landscape-phone:pt-2 md:max-w-xl md:px-8 lg:max-w-5xl lg:gap-8">
       <Hud
         lives={state.lives}
         score={state.score}
@@ -105,47 +105,53 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
         itemCount={state.items.length}
       />
 
-      {/* Feedback on the previous item sits above the new one and names it,
-          so "Right!" can never be read as the answer for the item now on screen. */}
-      <div aria-live="polite" className="flex min-h-16 items-center justify-center">
-        {rightItem && state.phase === 'sorting' ? (
-          <motion.div
-            key={rightItem.id}
-            initial={{ y: -8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="sticker w-full bg-meadow-tint px-3 py-2 shadow-sticker-sm"
-          >
-            <p className="flex items-center gap-1.5 text-sm font-bold text-meadow">
-              <Check className="size-4 shrink-0" aria-hidden="true" />
-              Right!
-              <span className="truncate text-ink">
-                {rightItem.name} → {binFor(rightItem.bin).name}
-              </span>
-            </p>
-            <p className="line-clamp-2 text-[13px] leading-snug text-ink-muted">{rightItem.why}</p>
-          </motion.div>
-        ) : (
-          <p className="text-center text-ink-muted">Drag it to its bin in Leeuwarden, or tap the bin</p>
-        )}
+      {/* UI 102 grid: one column on an upright phone; side by side (item left, bins right)
+          on a phone held sideways (bins get 3/5 of the width, so their hints wrap less) and on a desktop. */}
+      <div className="flex flex-1 flex-col gap-4 short:gap-2 landscape-phone:grid landscape-phone:grid-cols-[2fr_3fr] landscape-phone:items-center landscape-phone:gap-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
+        <div className="flex flex-1 flex-col gap-4 short:gap-2">
+          {/* Feedback on the previous item sits above the new one and names it,
+              so "Right!" can never be read as the answer for the item now on screen. */}
+          <div aria-live="polite" className="flex min-h-16 items-center justify-center landscape-phone:min-h-12">
+            {rightItem && state.phase === 'sorting' ? (
+              <motion.div
+                key={rightItem.id}
+                initial={{ y: -8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
+              >
+                <p className="flex items-center gap-2 text-small font-bold text-meadow">
+                  <Check className="size-4 shrink-0" aria-hidden="true" />
+                  Right!
+                  <span className="truncate text-ink">
+                    {rightItem.name} → {binFor(rightItem.bin).name}
+                  </span>
+                </p>
+                <p className="line-clamp-2 text-small leading-snug text-ink-muted">{rightItem.why}</p>
+              </motion.div>
+            ) : (
+              <p className="text-center text-small text-ink-muted">Drag it to its bin in Leeuwarden, or tap the bin</p>
+            )}
+          </div>
+
+          <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center">
+            <AnimatePresence mode="wait" onExitComplete={() => setIsSwapping(false)}>
+              {item && (
+                <ItemSticker
+                  key={item.id}
+                  item={item}
+                  onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
+                  onDrop={isAnswerable ? handleDrop : undefined}
+                />
+              )}
+            </AnimatePresence>
+          </section>
+        </div>
+
+        <BinGrid ref={binsRef} isDisabled={!isAnswerable} highlighted={hoveredBin} onSelect={handleSelect} />
       </div>
 
-      <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center">
-        <AnimatePresence mode="wait" onExitComplete={() => setIsSwapping(false)}>
-          {item && (
-            <ItemSticker
-              key={item.id}
-              item={item}
-              onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
-              onDrop={isAnswerable ? handleDrop : undefined}
-            />
-          )}
-        </AnimatePresence>
-      </section>
-
-      <BinGrid ref={binsRef} isDisabled={!isAnswerable} highlighted={hoveredBin} onSelect={handleSelect} />
-
       {hasSaveError && (
-        <p role="status" className="text-center text-sm text-ink-muted">
+        <p role="status" className="text-center text-small text-ink-muted">
           Your answers couldn&apos;t be saved. You can keep playing.
         </p>
       )}

@@ -1,11 +1,11 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
 
 // shadcn's button, restyled as a sticker: ink outline, hard shadow, presses down when tapped.
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 border-[3px] border-ink font-heading font-bold whitespace-nowrap select-none outline-none transition-[transform,box-shadow] duration-150 ease-out focus-visible:ring-4 focus-visible:ring-ring/40 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  "inline-flex shrink-0 items-center justify-center gap-2 border-[3px] border-ink font-heading font-bold whitespace-nowrap select-none outline-none transition-[transform,box-shadow] duration-150 ease-out focus-visible:ring-4 focus-visible:ring-fries-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cream active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {

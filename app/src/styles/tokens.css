@@ -5,6 +5,10 @@
  */
 
 @theme {
+  /* Colour roles (UI 102, 60/30/10): about 60% cream page, 30% white and sky cards and sheets,
+     10% accent: fries-blue for actions, sun for the score and highlights.
+     Green, red and the bin tints carry meaning (right, wrong and lives, which bin), never decoration. */
+
   /* Palette */
   --color-ink: #13233f;          /* text, outlines, hard shadows · 14.8:1 on cream */
   --color-ink-muted: #4a5876;    /* secondary text · 6.8:1 on cream */
@@ -36,6 +40,27 @@
   /* Type: two families, self-hosted */
   --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale (UI 102: "always start with type"): six steps, used as text-small … text-display.
+     Running text gets 145–150% line height, headings less. The bigger steps grow a little with the screen. */
+  --text-small: 0.875rem; /* 14px: source lines, captions, bin hints */
+  --text-small--line-height: 1.45;
+  --text-body: clamp(1rem, 0.97rem + 0.12vw, 1.0625rem); /* 16→17px: running text */
+  --text-body--line-height: 1.5;
+  --text-lead: clamp(1.125rem, 1.08rem + 0.2vw, 1.25rem); /* 18→20px: how-to steps, explanations */
+  --text-lead--line-height: 1.5;
+  --text-title: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem); /* 20→24px: section headings, item names */
+  --text-title--line-height: 1.25;
+  --text-heading: clamp(2rem, 1.7rem + 1.2vw, 2.75rem); /* 32→44px: screen titles */
+  --text-heading--line-height: 1.1;
+  --text-display: clamp(3.5rem, 2.6rem + 3.6vw, 5rem); /* 56→80px: "Which Bin?" and the round score */
+  --text-display--line-height: 1;
+
+  /* Spacing (UI 102, "UI spacing friendship"): only these steps, in Tailwind units of 4px:
+     1 = 4px, 2 = 8px, 4 = 16px, 6 = 24px, 8 = 32px, 12 = 48px, 16 = 64px (desktop).
+     The closer two things belong together, the smaller the step: 4–8px inside one component
+     (an icon and its label), 16px card padding and between items in a group, 24px between groups,
+     32–48px between the sections of a screen. */
 
   /* Shape: the sticker look */
   --radius-sticker: 18px;

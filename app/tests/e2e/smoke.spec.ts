@@ -52,6 +52,38 @@ test('no sideways scrolling on a 320px-wide phone', async ({ page }) => {
   await expectRoundFits(page)
 })
 
+// UI 102 grid: on a phone held sideways the round goes side by side, so nothing scrolls out of sight.
+test('on a landscape phone the lives, the item and all six bins fit without scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 667, height: 375 })
+  await startRound(page)
+  await expectNoSideways(page)
+  await expectRoundFits(page)
+  await expect(itemFigure(page)).toBeInViewport({ ratio: 1 })
+})
+
+test('on a landscape phone the "Not quite" sheet fits, with Got it on screen', async ({ page }) => {
+  await page.setViewportSize({ width: 667, height: 375 })
+  await startRound(page)
+  const item = await currentItem(page)
+  await binButton(page, item.bin === 'sortibak' ? 'biobak' : 'sortibak').click()
+
+  const sheet = page.getByRole('dialog')
+  await expect(sheet.getByText('Not quite')).toBeVisible()
+  await expect(sheet.getByRole('button', { name: 'Got it' })).toBeInViewport({ ratio: 1 })
+})
+
+for (const { width, height } of [
+  { width: 768, height: 1024 },
+  { width: 1440, height: 900 },
+]) {
+  test(`no sideways scrolling, and the round fits, at ${width}px wide`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await startRound(page)
+    await expectNoSideways(page)
+    await expectRoundFits(page)
+  })
+}
+
 test('a right answer scores, a wrong answer explains why with the source', async ({ page }) => {
   await startRound(page)
   await expectRoundFits(page)

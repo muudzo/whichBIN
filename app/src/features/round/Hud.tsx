@@ -17,7 +17,7 @@ export function Hud({ lives, score, streak, itemNumber, itemCount }: Props) {
   const progress = Math.min(100, ((itemNumber - 1) / itemCount) * 100)
 
   return (
-    <header className="flex flex-col gap-2">
+    <header className="flex flex-col gap-2 landscape-phone:gap-1">
       <div className="flex items-center justify-between">
         <div className="flex gap-1" role="img" aria-label={`${lives} of ${LIVES_PER_ROUND} lives left`}>
           {hearts.map((isAlive, i) => (
@@ -26,13 +26,13 @@ export function Hud({ lives, score, streak, itemNumber, itemCount }: Props) {
         </div>
 
         {streak >= SHOW_STREAK_FROM && (
-          <span className="flex items-center gap-1 rounded-full border-2 border-ink bg-paper px-2.5 py-0.5 text-sm font-bold">
+          <span className="flex items-center gap-1 rounded-full border-2 border-ink bg-paper px-2 py-1 text-small font-bold">
             <Flame className="size-4 text-pompebled" aria-hidden="true" />
             ×{streak} streak
           </span>
         )}
 
-        <span className="rounded-full border-2 border-ink bg-sun px-3 py-0.5 font-heading text-lg font-extrabold tabular-nums">
+        <span className="rounded-full border-2 border-ink bg-sun px-4 py-1 font-heading text-title font-extrabold tabular-nums">
           {score}
           <span className="sr-only"> points</span>
         </span>
@@ -51,7 +51,7 @@ export function Hud({ lives, score, streak, itemNumber, itemCount }: Props) {
           style={{ transform: `scaleX(${progress / 100})` }}
         />
       </div>
-      <p className="text-sm text-ink-muted">
+      <p className="text-small text-ink-muted">
         Item {itemNumber} of {itemCount}
       </p>
     </header>

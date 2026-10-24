@@ -31,13 +31,13 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
   }, [store])
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-5 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <h1 className="flex items-center gap-2 font-heading text-4xl font-extrabold">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+      <h1 className="flex items-center gap-2 font-heading text-heading font-extrabold">
         <Trophy className="size-8 text-fries-blue" aria-hidden="true" /> Leaderboard
       </h1>
 
       {!store.isShared && (
-        <p className="sticker bg-sky px-4 py-3 text-sm shadow-sticker-sm">
+        <p className="sticker bg-sky p-4 text-small shadow-sticker-sm">
           For now these scores live on this phone only. The shared leaderboard arrives with the database.
         </p>
       )}
@@ -52,7 +52,7 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
       {board && (
         <>
           <section aria-labelledby="top-title" className="flex flex-col gap-2">
-            <h2 id="top-title" className="font-heading text-lg font-bold">
+            <h2 id="top-title" className="font-heading text-title font-bold">
               Top scores
             </h2>
             {board.top.length === 0 ? (
@@ -62,9 +62,9 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
                 {board.top.map((entry, i) => (
                   <li
                     key={`${entry.nickname}-${entry.createdAt}`}
-                    className={`sticker flex items-center gap-3 px-4 py-2.5 shadow-sticker-sm ${entry.nickname === highlight ? 'bg-sun' : 'bg-paper'}`}
+                    className={`sticker flex items-center gap-4 px-4 py-2 shadow-sticker-sm ${entry.nickname === highlight ? 'bg-sun' : 'bg-paper'}`}
                   >
-                    <span className="w-6 font-heading text-lg font-extrabold tabular-nums">{i + 1}</span>
+                    <span className="w-8 font-heading text-title font-extrabold tabular-nums">{i + 1}</span>
                     <span className="flex-1 font-bold">
                       {entry.nickname}
                       {entry.nickname === highlight && <span className="sr-only"> (you)</span>}
@@ -78,12 +78,12 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
 
           {board.missed.length > 0 && (
             <section aria-labelledby="missed-title" className="flex flex-col gap-2">
-              <h2 id="missed-title" className="font-heading text-lg font-bold">
+              <h2 id="missed-title" className="font-heading text-title font-bold">
                 Most missed items
               </h2>
-              <ul className="flex flex-col gap-1.5">
+              <ul className="flex flex-col gap-2">
                 {board.missed.map((stat) => (
-                  <li key={stat.itemId} className="flex justify-between border-b-2 border-ink/15 pb-1.5">
+                  <li key={stat.itemId} className="flex justify-between border-b-2 border-ink/15 pb-2">
                     <span>{itemFor(stat.itemId)?.name ?? stat.itemId}</span>
                     <span className="text-ink-muted tabular-nums">
                       {stat.wrong} of {stat.total} wrong
@@ -96,7 +96,7 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
         </>
       )}
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-4">
         <Button size="lg" onClick={onPlay}>
           Play again
         </Button>
