@@ -59,4 +59,19 @@ test.describe('screens', () => {
     await expect(page.getByRole('heading', { name: /Leaderboard/ })).toBeVisible()
     await page.screenshot({ path: `${OUT}/07-leaderboard.png`, fullPage: true })
   })
+
+  // UI 102 grid: the round side by side on a desktop and on a phone held sideways.
+  test('the round on a desktop and on a phone held sideways', async ({ page }) => {
+    test.skip(test.info().project.name !== 'iphone-se', 'Screenshots at one size only')
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Play' }).click()
+    await page.getByRole('button', { name: 'Start round' }).click()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: `${OUT}/08-round-desktop.png` })
+
+    await page.setViewportSize({ width: 667, height: 375 })
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: `${OUT}/09-round-landscape.png` })
+  })
 })

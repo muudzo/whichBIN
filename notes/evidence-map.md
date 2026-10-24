@@ -57,6 +57,7 @@
 
 ### Frontend
 - **Evidence now:**
+  - Responsive from 320px phones to 1440px desktops (24 Oct): the round goes side by side on desktops and on phones held sideways; browser tests check the fit at 320, 667×375, 768 and 1440 (`design/ui102/`).
   - Touch drag and drop (21 Oct): drag the item onto a bin, and the bin under the finger lights up. Tapping still works. The drop check is two plain functions with 5 tests (`app/src/features/round/dropTarget.ts`).
   - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
   - 51 unit tests, and browser tests on four phone sizes (25 passing runs), including dragging onto a bin and dropping outside the bins.
@@ -116,7 +117,9 @@
 - **Jira:** SCRUM-74, SCRUM-71, SCRUM-57
 
 ### Explain the work, Gibbs reflections, usability teachers' feedback
-- **Evidence now:** small commits I can walk through one by one, plus the work log's facts and problems tables as raw material.
+- **Evidence now:**
+  - Small commits I can walk through one by one, plus the work log's facts and problems tables as raw material.
+  - The UI 102 lesson applied to Which Bin (24 Oct): type scale, spacing system, grids per screen size, hierarchy and affordances, with before and after screenshots of the same screens in `design/ui102/` (labelled comparisons in `compare/`).
 - **Still missing:**
   - My Gibbs reflections.
   - Feedback from the usability teachers, including the UI 102 exercise.

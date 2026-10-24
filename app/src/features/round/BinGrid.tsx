@@ -13,7 +13,7 @@ type Props = {
 // 3 × 2 grid: six big targets in thumb reach (Fitts's law).
 export function BinGrid({ ref, isDisabled, highlighted, onSelect }: Props) {
   return (
-    <div ref={ref} className="grid grid-cols-3 gap-2.5" role="group" aria-label="Bins">
+    <div ref={ref} className="grid grid-cols-3 gap-2 lg:gap-4" role="group" aria-label="Bins">
       {catalog.bins.map((bin) => (
         <BinTarget
           key={bin.id}
