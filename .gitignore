@@ -27,3 +27,7 @@ coverage/
 # macOS and Word
 .DS_Store
 ~$*
+
+# Secrets: the database connection string (copy supabase/.env.example)
+.env
+supabase/.env

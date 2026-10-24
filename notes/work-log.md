@@ -147,10 +147,15 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 
 ### What we did
 - **Architecture diagrams set up in Mermaid** (SCRUM-75): starter files in `design/architecture/`. `README.md` explains how to preview, export and write the syntax; `1-application.md` (flowchart) and `2-answer-submission.md` (sequence diagram) each have drawing notes and an empty diagram. The diagrams themselves are still to draw.
+- **Architecture diagrams drawn** by me and committed (`3e35ea1`).
+- **Supabase plan agreed** (SCRUM-51): `notes/plans/2026-10-24-supabase.md`. I write the SQL with a quick lesson; the counts are worked out when asked; the database decides right or wrong from an `items` table; the Players table and city requests are dropped.
+- **Database groundwork** (Claude): the lesson and specification in `supabase/README.md`; 16 tests of what browsers may and may not do (`supabase/tests/permissions.sql`), written before the SQL; `npm run db:apply`, `db:test` and `db:reset` (`supabase/db.js`, 5 tests). The tests were checked against a throwaway local database: they pass on a correct schema, leave no rows, and catch a missing `revoke` with a hint.
 
 ### Problems and how we solved them
 | Problem | How we solved it |
 |---|---|
+| The root `npm test` also ran the app's TypeScript tests, which only work in Vite (10 failures) | Limited it to `scraper.test.js` and `supabase/db.test.js`; 30 pass |
+| Supabase gives browsers every right on a new table by default | The lesson starts each table by taking all rights away (`revoke`), and test 3 fails with a hint if that's missing |
 | VS Code's built-in preview doesn't draw Mermaid, and the `code` command isn't available in the terminal to install the extension | Install "Markdown Preview Mermaid Support" from the Extensions panel; mermaid.live works without installing anything |
 
 ### My reflection
