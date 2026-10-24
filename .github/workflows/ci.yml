@@ -1,0 +1,95 @@
+# Checks every push to main and every pull request. Validation only: nothing is deployed.
+# What each job does and how to fix a failure: docs/ci.md
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request: # every pull request, from any branch
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request cancels the run that's still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  root:
+    name: Root tests (scraper, database runner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22 # LTS, the same major version as local development
+      # The root package has no dependencies, so there is nothing to install.
+      - run: npm test
+
+  app:
+    name: App (lint, type check, unit tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - name: Install (exactly what package-lock.json says)
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:run
+      - name: Build
+        run: npm run build
+
+  database:
+    name: Database permission tests (throwaway Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # A fresh Postgres, the same major version as the Supabase project, deleted when the job ends.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # The throwaway database above. No secrets: the real project is never contacted.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Stop unless this is the throwaway database
+        run: |
+          case "$DATABASE_URL" in
+            *@localhost:5432/*) echo "Using the throwaway CI database." ;;
+            *) echo "DATABASE_URL is not the throwaway CI database. Stopping." && exit 1 ;;
+          esac
+      - name: Add the Supabase browser roles
+        run: |
+          psql --version
+          psql "$DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f supabase/tests/ci-setup.sql
+      - name: Apply the migrations and copy the items
+        run: npm run db:apply
+      - name: Permission tests
+        run: npm run db:test
