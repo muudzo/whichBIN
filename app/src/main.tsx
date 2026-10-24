@@ -1,12 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
-import { createLocalScoreStore } from './services/scoreStore'
+import { chooseScoreStore } from './services/chooseScoreStore'
 import './styles/global.css'
 
-// The local store keeps the game playable before the database exists.
-// After the architecture review, the Supabase store is passed in here instead.
-const store = createLocalScoreStore()
+// The shared Supabase store when app/.env.local has its settings, otherwise the local one.
+const store = chooseScoreStore(import.meta.env)
 
 createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>

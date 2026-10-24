@@ -20,5 +20,8 @@ export default defineConfig({
     url: 'http://localhost:4173',
     reuseExistingServer: false,
     timeout: 120_000,
+    // Blank Supabase settings win over app/.env.local, so the tests play on the local store
+    // and never save test answers or scores in the real database.
+    env: { VITE_SUPABASE_URL: '', VITE_SUPABASE_PUBLISHABLE_KEY: '' },
   },
 })
