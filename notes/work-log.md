@@ -140,3 +140,20 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 - What went well:
 - What was hard:
 - What I'd do differently:
+
+---
+
+## Sat 24 Oct 2026
+
+### What we did
+- **Architecture diagrams set up in Mermaid** (SCRUM-75): starter files in `design/architecture/`. `README.md` explains how to preview, export and write the syntax; `1-application.md` (flowchart) and `2-answer-submission.md` (sequence diagram) each have drawing notes and an empty diagram. The diagrams themselves are still to draw.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| VS Code's built-in preview doesn't draw Mermaid, and the `code` command isn't available in the terminal to install the extension | Install "Markdown Preview Mermaid Support" from the Extensions panel; mermaid.live works without installing anything |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:
