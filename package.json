@@ -3,7 +3,10 @@
   "type": "module",
   "scripts": {
     "start": "node scraper.js",
-    "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage"
+    "test": "node --test scraper.test.js supabase/db.test.js",
+    "test:coverage": "node --test --experimental-test-coverage scraper.test.js supabase/db.test.js",
+    "db:apply": "node supabase/db.js apply",
+    "db:test": "node supabase/db.js test",
+    "db:reset": "node supabase/db.js reset"
   }
 }
