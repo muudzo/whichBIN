@@ -1,6 +1,7 @@
 import { Shuffle } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { LIVES_PER_ROUND } from '@/domain/game'
 import { generateNickname } from '@/domain/nickname'
 import { binFor } from '@/features/game/catalog'
 import type { RoundResult } from '@/features/round/RoundScreen'
@@ -11,12 +12,14 @@ type Props = {
   store: ScoreStore
   onNextRound: () => void
   onSaved: (nickname: string) => void
+  // The leaderboard without saving a score first (H7)
+  onLeaderboard: () => void
 }
 
 type SaveStatus = 'idle' | 'saving' | 'error'
 
 // End on a summary, not a fail (peak-end rule). The mistakes are the learning moment.
-export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
+export function ScoreScreen({ result, store, onNextRound, onSaved, onLeaderboard }: Props) {
   const [nickname, setNickname] = useState(() => generateNickname())
   const [status, setStatus] = useState<SaveStatus>('idle')
   const hasMistakes = result.mistakes.length > 0
@@ -43,11 +46,19 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
       <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 
       <header className="flex flex-col items-center gap-1 text-center">
-        <h1 className="font-heading text-title font-bold">Round {result.roundNumber} complete</h1>
+        {/* A round that ended on lives says so, and counts only the items answered (H1, H9) */}
+        <h1 className="font-heading text-title font-bold">
+          {result.ranOutOfLives ? 'Out of lives' : `Round ${result.roundNumber} complete`}
+        </h1>
         <p className="font-heading text-display font-extrabold tabular-nums">
           {result.correct}
-          <span className="text-ink-muted"> / {result.total}</span>
+          <span className="text-ink-muted"> / {result.answered}</span>
         </p>
+        {result.ranOutOfLives && (
+          <p className="text-ink-muted">
+            Round {result.roundNumber} ended after {LIVES_PER_ROUND} wrong answers.
+          </p>
+        )}
         <p className="text-ink-muted">
           <strong className="text-ink">{result.score} points</strong> · best streak {result.bestStreak}
         </p>
@@ -106,6 +117,9 @@ export function ScoreScreen({ result, store, onNextRound, onSaved }: Props) {
           Next round
         </Button>
         {hasMistakes && <p className="text-center text-small text-ink-muted">Your mistakes from this round come back.</p>}
+        <Button variant="ghost" onClick={onLeaderboard}>
+          See the leaderboard
+        </Button>
       </div>
     </main>
   )

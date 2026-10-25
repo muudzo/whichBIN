@@ -7,6 +7,8 @@ import type { ItemStat, ScoreRecord, ScoreStore } from '@/services/scoreStore'
 type Props = {
   store: ScoreStore
   highlight?: string
+  // "Play" for someone who came here from the start screen, "Play again" after a round
+  hasPlayed?: boolean
   onPlay: () => void
   onHome: () => void
 }
@@ -16,9 +18,11 @@ type Board = { top: readonly ScoreRecord[]; missed: readonly ItemStat[] }
 const TOP_COUNT = 10
 const MISSED_COUNT = 3
 
-export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
+export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay, onHome }: Props) {
   const [board, setBoard] = useState<Board>()
   const [hasError, setHasError] = useState(false)
+  // Bumped by "Try again" to load once more (H9)
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
     let isCancelled = false
@@ -28,7 +32,12 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
     return () => {
       isCancelled = true
     }
-  }, [store])
+  }, [store, attempt])
+
+  function handleRetry() {
+    setHasError(false)
+    setAttempt((count) => count + 1)
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
@@ -43,9 +52,14 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
       )}
 
       {hasError && (
-        <p role="alert" className="font-bold text-pompebled">
-          Couldn&apos;t load the leaderboard. Try again in a moment.
-        </p>
+        <div className="flex flex-col items-start gap-2">
+          <p role="alert" className="font-bold text-pompebled">
+            Couldn&apos;t load the leaderboard. Check your connection, then try again.
+          </p>
+          <Button variant="secondary" size="sm" onClick={handleRetry}>
+            Try again
+          </Button>
+        </div>
       )}
       {!board && !hasError && <p className="text-ink-muted">Loading…</p>}
 
@@ -98,7 +112,7 @@ export function LeaderboardScreen({ store, highlight, onPlay, onHome }: Props) {
 
       <div className="mt-auto flex flex-col gap-4">
         <Button size="lg" onClick={onPlay}>
-          Play again
+          {hasPlayed ? 'Play again' : 'Play'}
         </Button>
         <Button variant="ghost" onClick={onHome}>
           Back to the start

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import type { Item } from '@/domain/catalog'
@@ -156,5 +156,91 @@ describe('App', () => {
     await waitFor(() =>
       expect(calls).toEqual({ submitAnswer: 10, itemStat: 1, submitScore: 1, topScores: 1, mostMissed: 1 }),
     )
+  })
+
+  // Heuristic fixes (research/heuristic-evaluation/2026-10-25-evaluator-claude.md)
+
+  // F3 (H1, H9): a round that ends on lives says so, instead of "complete"
+  it('says "Out of lives" when three wrong answers end the round early', async () => {
+    const user = await startFirstRound()
+    for (let i = 0; i < 3; i += 1) {
+      await user.click(binButton(currentItem(), false))
+      await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Got it' }))
+      if (i < 2) await screen.findByText(`Item ${i + 2} of 10`)
+    }
+
+    expect(await screen.findByRole('heading', { name: 'Out of lives' })).toBeInTheDocument()
+    expect(screen.getByText(/ended after 3 wrong answers/)).toBeInTheDocument()
+  })
+
+  // F2 (H3, H5): a clearly marked way out of a round, which asks first; the safe choice is the main button
+  it('asks before leaving a round with the × button, and Keep playing stays in the round', async () => {
+    const user = await startFirstRound()
+
+    await user.click(screen.getByRole('button', { name: 'Leave round' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Leave this round?' })
+    await user.click(within(sheet).getByRole('button', { name: 'Keep playing' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Leave this round?' })).not.toBeInTheDocument())
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
+  it('ignores the number keys while "Leave this round?" is open', async () => {
+    const user = await startFirstRound()
+    const item = currentItem()
+    await user.click(screen.getByRole('button', { name: 'Leave round' }))
+    await screen.findByRole('dialog', { name: 'Leave this round?' })
+
+    await user.keyboard(String(catalog.bins.findIndex((bin) => bin.id === item.bin) + 1))
+
+    expect(screen.queryByText('Right!')).not.toBeInTheDocument()
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
+  // F1 (H3): the phone's Back button stays in the game; during a round it asks first
+  it("asks before the phone's Back button leaves a round, then goes back to the start", async () => {
+    const user = await startFirstRound()
+
+    act(() => window.history.back())
+    const sheet = await screen.findByRole('dialog', { name: 'Leave this round?' })
+    await user.click(within(sheet).getByRole('button', { name: 'Leave' }))
+
+    expect(await screen.findByRole('heading', { name: /Which\s*Bin\?/ })).toBeInTheDocument()
+  })
+
+  it("goes back to the start with the phone's Back button from How to play", async () => {
+    const user = userEvent.setup()
+    render(<App store={createLocalScoreStore()} />)
+    await user.click(screen.getByRole('button', { name: 'Play' }))
+    await screen.findByRole('heading', { name: 'How to play' })
+
+    act(() => window.history.back())
+
+    expect(await screen.findByRole('heading', { name: /Which\s*Bin\?/ })).toBeInTheDocument()
+  })
+
+  // F5 (H7, H6): the community results are reachable without saving a score
+  it('opens the leaderboard from the welcome screen, with Play (not Play again) for a first visit', async () => {
+    const user = userEvent.setup()
+    render(<App store={createLocalScoreStore()} />)
+
+    await user.click(screen.getByRole('button', { name: 'See the leaderboard' }))
+
+    expect(await screen.findByRole('heading', { name: /Leaderboard/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Back to the start' }))
+    expect(await screen.findByRole('heading', { name: /Which\s*Bin\?/ })).toBeInTheDocument()
+  })
+
+  it('opens the leaderboard from the score screen without saving the score', async () => {
+    const user = await startFirstRound()
+    for (let i = 0; i < 10; i += 1) {
+      await answerRight(user, i === 9)
+    }
+
+    await user.click(await screen.findByRole('button', { name: 'See the leaderboard' }))
+
+    expect(await screen.findByRole('heading', { name: /Leaderboard/ })).toBeInTheDocument()
+    expect(screen.getByText(/No scores yet/)).toBeInTheDocument()
   })
 })
