@@ -143,6 +143,29 @@ test('dropping the item outside the bins puts it back without answering', async 
   await expect(lives).toBeVisible()
 })
 
+// Forgiving targets: a drop just past a bin's edge still lands in it. (The gaps between bins are
+// covered by the nearestTarget unit tests.) The drop is just outside the bin's outer edge, where no other bin competes.
+test('dropping the item just beside its bin still sorts it there', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const bin = await binButton(page, item.bin).boundingBox()
+  const grid = await page.getByRole('group', { name: 'Bins' }).boundingBox()
+  if (!bin || !grid) throw new Error('No bins on screen')
+  const centre = { x: bin.x + bin.width / 2, y: bin.y + bin.height / 2 }
+  // Left column: drop to its left; right column: to its right; middle column: above or below, away from the grid's centre.
+  const fromMiddle = centre.x - (grid.x + grid.width / 2)
+  const across = Math.abs(fromMiddle) < bin.width / 2 ? 0 : Math.sign(fromMiddle)
+  const down = across === 0 ? Math.sign(centre.y - (grid.y + grid.height / 2)) : 0
+
+  await dragItemTo(page, {
+    x: centre.x + across * (bin.width / 2 + 8),
+    y: centre.y + down * (bin.height / 2 + 8),
+  })
+
+  await expect(page.getByText('Right!')).toBeVisible()
+  await expect(page.getByText('Item 2 of 10')).toBeVisible()
+})
+
 test('the score screen fits sideways after a full round', async ({ page }) => {
   await startRound(page)
   for (let i = 0; i < 10; i += 1) {

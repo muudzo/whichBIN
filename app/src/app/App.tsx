@@ -54,7 +54,7 @@ export function App({ store }: Props) {
   function renderScreen() {
     switch (screen.name) {
       case 'welcome':
-        return <WelcomeScreen onPlay={handlePlay} />
+        return <WelcomeScreen onPlay={handlePlay} savesAnswers={store.isShared} />
       case 'how-to':
         return (
           <HowToScreen

@@ -2,7 +2,7 @@
 
 > A living list. For each line of my learning goals (`learning goals2026P1.pdf`) it shows what proves it, where that lives, how to show it in about a minute, and what's still missing. Update it whenever a deliverable lands. It lists facts only; whether the evidence is enough is for me and the assessors to judge.
 
-**Status:** Sat 24 Oct 2026 · deadline Fri 23 Oct (morning)
+**Status:** Sun 25 Oct 2026 · deadline Fri 23 Oct (morning)
 
 ## Showcase list: the headline demos
 
@@ -58,6 +58,7 @@
 ### Frontend
 - **Evidence now:**
   - Responsive from 320px phones to 1440px desktops (24 Oct): the round goes side by side on desktops and on phones held sideways; browser tests check the fit at 320, 667×375, 768 and 1440 (`design/ui102/`).
+  - Drag and drop made forgiving and clearer (25 Oct): judged by where the item is, near misses count, the item shrinks and the bins lift while dragging, sorted items fly into their bin; keys 1–6 on laptops. Tested on four phones, including repeated runs.
   - Touch drag and drop (21 Oct): drag the item onto a bin, and the bin under the finger lights up. Tapping still works. The drop check is two plain functions with 5 tests (`app/src/features/round/dropTarget.ts`).
   - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
   - 51 unit tests, and browser tests on four phone sizes (25 passing runs), including dragging onto a bin and dropping outside the bins.
@@ -73,13 +74,16 @@
   - A Supabase project in Frankfurt (EU), 24 Oct.
   - My SQL, `supabase/migrations/001_tables_and_permissions.sql`: the `items`, `answers` and `scores` tables with checks (real items and bins only, generated nicknames only, possible scores only); browsers' rights taken away, then insert on answers and insert and select on scores given back; row level security; the counts `item_stat` and `most_missed`.
   - The database decides right or wrong: the counts compare each answer with the `items` table, which `npm run db:apply` copies from `items.json` and checks.
+  - No N+1 queries: a whole visit is 14 database calls, guarded by a unit test (25 Oct).
   - 16 permission tests pass against the live project (`npm run db:test`, `supabase/tests/permissions.sql`). They prove browsers can't read individual answers or change or delete anything, and they undo their own rows.
 - **Show it:** run `npm run db:test` live, then walk through one grant, one policy and `item_stat` in the SQL file.
 - **Still missing:** the game connected to the database (the Supabase score store), and the privacy line (SCRUM-54).
 - **Jira:** SCRUM-51, SCRUM-52, SCRUM-53, SCRUM-54
 
 ### Integrate, test, deploy
-- **Evidence now:** CI on GitHub Actions (`.github/workflows/ci.yml`, `docs/ci.md`): every push to `main` and every pull request runs the root tests, the app's lint, type check, unit tests and build, and the 16 database permission tests on a throwaway Postgres. Checked locally; not yet run on GitHub.
+- **Evidence now:**
+  - The game saves to Supabase (25 Oct): a real round's answers and score arrived; the database works out right and wrong; through the live API, reading answers is refused and reading the leaderboard is allowed.
+  - CI on GitHub Actions (`.github/workflows/ci.yml`, `docs/ci.md`): every push to `main` and every pull request runs the root tests, the app's lint, type check, unit tests and build, and the 16 database permission tests on a throwaway Postgres. Checked locally; not yet run on GitHub.
 - **Still missing:** the frontend connected to Supabase, tests of submissions, scores and permissions, and a public link (Cloudflare Pages).
 - **Jira:** SCRUM-27
 

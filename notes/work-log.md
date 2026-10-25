@@ -176,3 +176,31 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 - What went well:
 - What was hard:
 - What I'd do differently:
+
+---
+
+## Sun 25 Oct 2026
+
+### What we did
+- **Merged `feat/app-boilerplate` into `main`** (on request): a fast-forward of 31 commits up to `3754585`, so no merge conflicts and no merge commit. First checked the commits for secret files (none) and ran every check on the committed code: 30 root tests, type check, lint, 64 unit tests, build, 40 browser runs. Not yet pushed to GitHub's `main`.
+- **Installed a third-party agent skill,** `brag-slim` (github.com/latent-spaces/brag, MIT), for Claude Code in this project: it turns a project into a ~20-second launch video. Its one file was read in full before installing; the installer's scans said Safe (Gen), 0 alerts (Socket), Med Risk (Snyk). Git-ignored with its `skills-lock.json`, as a file given to Claude.
+- **The game is connected to Supabase** (SCRUM-52 Done, SCRUM-53 In Progress): `app/.env.local` created (git-ignored) with the project URL; I added the publishable key. One real round saved 6 answers under one session id; the database worked out 3 right and 3 wrong; the score (Lucky Tulip 72, 300 points, 3/10) is on the shared leaderboard. Through the live API, reading answers is refused (401) and reading the leaderboard is allowed. The "x of y other players" line waits for a second visit.
+- **Community line seen live** (SCRUM-53 Done): a second visit got batteries and jam jar wrong after the first, so its sheet showed "1 of 1 other player got this wrong too".
+- **Privacy line** (SCRUM-54, Claude): the welcome screen says "Answers are saved anonymously, to show which items people get wrong", only when answers go to the shared database. 2 tests written first; still fits on the smallest iPhone.
+- **Database calls checked for N+1** (Claude; plan `notes/plans/2026-10-25-requests-drag-vercel.md`): none. A whole visit is 14 calls (10 answers, 1 count per wrong answer, 1 score, 2 for the leaderboard); each database function is one query. A new unit test fails if that number grows. Found: `answers` has no index on `item_id` (every count is a full scan; fine now, slow at scale): a one-line migration `002` for me to write. Not fixed: no rate limit on inserts.
+- **Drag and drop made forgiving and clearer** (Claude): the drop is judged by where the sticker is, not the finger; drops up to 24px from a bin (including the gaps) count for the nearest bin (`nearestTarget`, 4 tests first); while dragged the sticker shrinks to about 80px on every device, its name fades and all bins lift; a sorted item flies into its bin (after a wrong answer, "Got it" sends it into the right one); bins are measured once per drag. Also: a one-time wiggle and bold hint on the first item; keys 1–6 pick bins on laptops (labels only with a mouse or trackpad, 1 test); a small vibration on drop on Android. 72 unit tests, 46 browser runs, drag tests repeated 36 times on four phones.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| Shrinking the dragged sticker toward the grab point sent it up to 110px away from the finger when it was grabbed during its entrance animation (WebKit) | Measured it mid-drag; it now shrinks around its centre, and the drop is judged by the sticker's centre |
+| On a near miss, the drop position was read after the spring back home had started, so it could tip into the neighbouring bin | The drop uses the last position seen during the drag |
+| The new near-miss browser test failed now and then: an exact tie in an 8px gap, then a middle bin read as a left one by a fraction of a pixel | Drops just outside the bin's outer edge; the middle column is recognised within half a bin; gap rules stay in the unit tests |
+| Repeated browser runs with 4 workers timed out while opening the page (WebKit overloaded) | Not a game bug: no failure after the page loaded. With 2 workers, 60 of 60 and 36 of 36 passed |
+| One unit-test run failed once without a name in the output | Not reproduced in 13 further runs; noted |
+| Deploying: Cloudflare's tool created a Workers project instead of a Pages one, and without asking added two packages, rewired `vite.config.ts` and changed the `preview` script the browser tests and CI depend on | Undid its four file changes and removed its config; type check, 66 unit tests and 40 browser runs pass again. Hosting choice (Cloudflare or Vercel) back to me |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:

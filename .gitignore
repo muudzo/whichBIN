@@ -31,3 +31,8 @@ coverage/
 # Secrets: the database connection string (copy supabase/.env.example)
 .env
 supabase/.env
+
+# Third-party agent skills installed for Claude: kept local, not part of the project.
+# Reinstall: npx skills add https://github.com/latent-spaces/brag --skill brag-slim -a claude-code -y
+.claude/skills/brag-slim/
+skills-lock.json

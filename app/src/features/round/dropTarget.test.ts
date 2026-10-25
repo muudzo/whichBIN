@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { measureTargets, targetAt, type DropTarget } from './dropTarget'
+import { measureTargets, nearestTarget, targetAt, type DropTarget } from './dropTarget'
 
 const box = (left: number, top: number, width = 100, height = 80) => ({
   left,
@@ -29,6 +29,29 @@ describe('targetAt', () => {
 
   it('finds nothing above the bins, where the item started', () => {
     expect(targetAt({ x: 50, y: 200 }, bins)).toBeUndefined()
+  })
+})
+
+// Forgiving targets: a drop just outside a bin, or in the gap between two, still counts.
+describe('nearestTarget', () => {
+  const TOLERANCE = 24
+
+  it('takes the bin under the point, like targetAt', () => {
+    expect(nearestTarget({ x: 150, y: 540 }, bins, TOLERANCE)).toBe('biobak')
+  })
+
+  it('gives a drop in the gap to the nearer bin', () => {
+    expect(nearestTarget({ x: 103, y: 540 }, bins, TOLERANCE)).toBe('sortibak')
+    expect(nearestTarget({ x: 108, y: 540 }, bins, TOLERANCE)).toBe('biobak')
+  })
+
+  it('counts a drop just outside the outer edge of a bin', () => {
+    expect(nearestTarget({ x: 225, y: 490 }, bins, TOLERANCE)).toBe('biobak')
+  })
+
+  it('finds nothing farther away than the tolerance', () => {
+    expect(nearestTarget({ x: 50, y: 470 }, bins, TOLERANCE)).toBeUndefined()
+    expect(nearestTarget({ x: 50, y: 200 }, bins, TOLERANCE)).toBeUndefined()
   })
 })
 
