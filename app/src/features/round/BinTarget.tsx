@@ -15,13 +15,17 @@ const BIN_STYLE: Record<BinId, { body: string; lid: string; Icon: LucideIcon }> 
 
 type Props = {
   bin: Bin
+  // The number key that picks this bin, shown on devices with a mouse or trackpad.
+  shortcut?: number
   isDisabled?: boolean
+  // True while an item is being dragged: the bin lifts a little to show it's a place to drop.
+  isAwaitingDrop?: boolean
   // True while an item is dragged over this bin: it grows and gets a thick outline, so the player sees where it will land.
   isHighlighted?: boolean
   onSelect?: (id: BinId) => void
 }
 
-export function BinTarget({ bin, isDisabled = false, isHighlighted = false, onSelect }: Props) {
+export function BinTarget({ bin, shortcut, isDisabled = false, isAwaitingDrop = false, isHighlighted = false, onSelect }: Props) {
   const { body, lid, Icon } = BIN_STYLE[bin.id]
 
   return (
@@ -30,14 +34,19 @@ export function BinTarget({ bin, isDisabled = false, isHighlighted = false, onSe
       data-bin-id={bin.id}
       disabled={isDisabled || !onSelect}
       onClick={() => onSelect?.(bin.id)}
-      animate={{ scale: isHighlighted ? 1.08 : 1 }}
+      animate={{ scale: isHighlighted ? 1.08 : isAwaitingDrop ? 1.02 : 1, y: isHighlighted || isAwaitingDrop ? -4 : 0 }}
       whileTap={{ scale: 0.94 }}
       aria-label={`${bin.name}: ${bin.english}`}
       // Hover lifts the bin like a sticker being picked up (mouse only); keyboard focus gets a solid ring.
-      className={`sticker relative flex min-h-[84px] short:min-h-[72px] md:min-h-28 lg:min-h-32 flex-col items-center justify-center gap-1 overflow-hidden px-1 pt-4 pb-2 short:pb-1 text-center shadow-sticker-sm transition-[translate,box-shadow] duration-150 ease-out enabled:hover:-translate-y-1 enabled:hover:shadow-sticker ${body} ${isHighlighted ? 'ring-4 ring-ink' : ''} focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fries-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-default`}
+      className={`sticker relative flex min-h-[84px] short:min-h-[72px] md:min-h-28 lg:min-h-32 flex-col items-center justify-center gap-1 overflow-hidden px-1 pt-4 pb-2 short:pb-1 text-center ${isAwaitingDrop ? 'shadow-sticker' : 'shadow-sticker-sm'} transition-[translate,box-shadow] duration-150 ease-out enabled:hover:-translate-y-1 enabled:hover:shadow-sticker ${body} ${isHighlighted ? 'ring-4 ring-ink' : ''} focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fries-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-default`}
     >
       {/* The lid: a darker band across the top, so the card reads as a bin */}
       <span aria-hidden="true" className={`absolute inset-x-0 top-0 h-2.5 border-b-[3px] border-ink ${lid}`} />
+      {shortcut !== undefined && (
+        <kbd aria-hidden="true" className="absolute top-3 right-2 hidden font-heading text-small leading-none font-bold text-ink/70 pointer-fine:block">
+          {shortcut}
+        </kbd>
+      )}
       <Icon className="size-5 text-ink md:size-6" aria-hidden="true" />
       {/* Labels, not running text: tight line height. The name drops a step where bins are narrow
           (the narrowest phones, and phones held sideways) so "Textielbak" fits. */}

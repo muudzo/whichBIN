@@ -4,6 +4,8 @@ import { stickerFor } from '@/features/game/stickers'
 
 type Props = {
   onPlay: () => void
+  // True when answers go to the shared database; then the screen says so before anyone plays (SCRUM-54).
+  savesAnswers?: boolean
 }
 
 // Test 1: testers didn't know what the product was. This screen says it in one line,
@@ -14,13 +16,13 @@ const HERO_STICKERS = [
   { id: 'torn-tshirt', className: 'left-[34%] top-[40%] -rotate-3 size-20 max-md:tall:size-24 md:size-28' },
 ] as const
 
-export function WelcomeScreen({ onPlay }: Props) {
+export function WelcomeScreen({ onPlay, savesAnswers = false }: Props) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
       <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 
-      <section aria-labelledby="welcome-title" className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center">
+      <section aria-labelledby="welcome-title" className="flex flex-1 flex-col items-center justify-center gap-4 py-4 text-center">
         <p className="rounded-full border-2 border-ink bg-sun px-4 py-1 text-small font-bold">A 2-minute game · Leeuwarden</p>
         {/* Two stacked words that read as one logo: tighter than the display step's own line height */}
         <h1 id="welcome-title" className="font-heading text-display leading-[0.9] font-extrabold">
@@ -48,6 +50,11 @@ export function WelcomeScreen({ onPlay }: Props) {
         </Button>
         <div className="flex flex-col gap-1">
           <p className="text-center text-small text-ink-muted">No account. About 2 minutes.</p>
+          {savesAnswers && (
+            <p className="text-center text-small text-ink-muted">
+              Answers are saved anonymously, to show which items people get wrong.
+            </p>
+          )}
           <SourceLine />
         </div>
       </div>
