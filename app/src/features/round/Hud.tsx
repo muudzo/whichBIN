@@ -1,5 +1,6 @@
-import { Flame } from 'lucide-react'
+import { Flame, X } from 'lucide-react'
 import { PompebledHeart } from '@/components/brand/PompebledHeart'
+import { Button } from '@/components/ui/button'
 import { LIVES_PER_ROUND } from '@/domain/game'
 
 type Props = {
@@ -8,21 +9,31 @@ type Props = {
   streak: number
   itemNumber: number
   itemCount: number
+  // A clearly marked way out of the round (H3). Without it, the button isn't shown.
+  onLeave?: () => void
 }
 
 const SHOW_STREAK_FROM = 2
 
-export function Hud({ lives, score, streak, itemNumber, itemCount }: Props) {
+export function Hud({ lives, score, streak, itemNumber, itemCount, onLeave }: Props) {
   const hearts = Array.from({ length: LIVES_PER_ROUND }, (_, i) => i < lives)
   const progress = Math.min(100, ((itemNumber - 1) / itemCount) * 100)
 
   return (
     <header className="flex flex-col gap-2 landscape-phone:gap-1">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1" role="img" aria-label={`${lives} of ${LIVES_PER_ROUND} lives left`}>
-          {hearts.map((isAlive, i) => (
-            <PompebledHeart key={i} isLost={!isAlive} className="size-7" />
-          ))}
+        <div className="flex items-center gap-2">
+          {onLeave && (
+            // 44px to tap, but the negative margins keep the top bar as low as the hearts
+            <Button variant="ghost" size="icon" className="-my-2 -ml-2" onClick={onLeave} aria-label="Leave round">
+              <X />
+            </Button>
+          )}
+          <div className="flex gap-1" role="img" aria-label={`${lives} of ${LIVES_PER_ROUND} lives left`}>
+            {hearts.map((isAlive, i) => (
+              <PompebledHeart key={i} isLost={!isAlive} className="size-7" />
+            ))}
+          </div>
         </div>
 
         {streak >= SHOW_STREAK_FROM && (

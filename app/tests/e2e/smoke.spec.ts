@@ -166,6 +166,22 @@ test('dropping the item just beside its bin still sorts it there', async ({ page
   await expect(page.getByText('Item 2 of 10')).toBeVisible()
 })
 
+// Heuristic fix F1 (H3): the browser's or phone's Back button doesn't leave the game; in a round it asks first.
+test("the Back button in a round asks before leaving, and Leave goes to the start", async ({ page }) => {
+  await startRound(page)
+  const sheet = page.getByRole('dialog', { name: 'Leave this round?' })
+
+  await page.goBack()
+  await expect(sheet).toBeVisible()
+  await sheet.getByRole('button', { name: 'Keep playing' }).click()
+  await expect(sheet).toBeHidden()
+  await expect(page.getByText('Item 1 of 10')).toBeVisible()
+
+  await page.goBack()
+  await sheet.getByRole('button', { name: 'Leave' }).click()
+  await expect(page.getByRole('heading', { name: /Which\s*Bin\?/ })).toBeVisible()
+})
+
 test('the score screen fits sideways after a full round', async ({ page }) => {
   await startRound(page)
   for (let i = 0; i < 10; i += 1) {

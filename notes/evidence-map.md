@@ -122,6 +122,7 @@
 
 ### Explain the work, Gibbs reflections, usability teachers' feedback
 - **Evidence now:**
+  - A heuristic evaluation of all six screens against Nielsen's 10 heuristics (25 Oct, Claude as one evaluator): 13 findings with severities and fixes, plus what works (`research/heuristic-evaluation/`). All 5 major and minor findings fixed the same evening, each with a test and a screenshot (`fixes/`). My own pass is still to do.
   - Small commits I can walk through one by one, plus the work log's facts and problems tables as raw material.
   - The UI 102 lesson applied to Which Bin (24 Oct): type scale, spacing system, grids per screen size, hierarchy and affordances, with before and after screenshots of the same screens in `design/ui102/` (labelled comparisons in `compare/`).
 - **Still missing:**

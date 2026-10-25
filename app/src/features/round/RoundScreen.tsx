@@ -28,6 +28,9 @@ export interface RoundResult {
   score: number
   correct: number
   total: number
+  // How many items were answered: fewer than `total` when the lives ran out first.
+  answered: number
+  ranOutOfLives: boolean
   bestStreak: number
   mistakes: Item[]
 }
@@ -38,6 +41,10 @@ type Props = {
   sessionId: string
   store: ScoreStore
   onFinish: (result: RoundResult) => void
+  // The top bar's "Leave round" button (H3); the app asks before leaving.
+  onRequestLeave?: () => void
+  // True while the app asks "Leave this round?": nothing can be answered behind the question (H5).
+  isPaused?: boolean
 }
 
 function toResult(state: RoundState, roundNumber: number): RoundResult {
@@ -46,12 +53,14 @@ function toResult(state: RoundState, roundNumber: number): RoundResult {
     score: state.score,
     correct: correctCount(state),
     total: state.items.length,
+    answered: state.answers.length,
+    ranOutOfLives: state.lives === 0,
     bestStreak: state.bestStreak,
     mistakes: mistakes(state),
   }
 }
 
-export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: Props) {
+export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, onRequestLeave, isPaused = false }: Props) {
   const [state, setState] = useState(() => startRound(items))
   const [stat, setStat] = useState<ItemStat>()
   const [hasSaveError, setHasSaveError] = useState(false)
@@ -67,7 +76,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
   const targetsRef = useRef<DropTarget<BinId>[]>([])
 
   const item = currentItem(state)
-  const isAnswerable = state.phase === 'sorting' && !isSwapping
+  const isAnswerable = state.phase === 'sorting' && !isSwapping && !isPaused
   const answer = lastAnswer(state)
   const answeredItem = answer ? itemFor(answer.itemId) : undefined
   const rightItem = answer?.correct ? answeredItem : undefined
@@ -86,7 +95,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
   }
 
   function handleSelect(bin: BinId) {
-    if (!item || state.phase !== 'sorting' || isSwapping) return
+    if (!item || !isAnswerable) return
     const correct = item.bin === bin
     setFlyTo(binCentre(correct ? bin : item.bin))
     setStat(undefined)
@@ -136,6 +145,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish }: 
         streak={state.streak}
         itemNumber={Math.min(state.index + 1, state.items.length)}
         itemCount={state.items.length}
+        onLeave={onRequestLeave}
       />
 
       {/* UI 102 grid: one column on an upright phone; side by side (item left, bins right)
