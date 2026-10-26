@@ -6,6 +6,7 @@ Feedback from my design review on 26 Oct: bins that look like bins, better use o
 - `after/`: the round screen after each step, added as the steps land.
   - `after/1-bins/`: step 1, the bins drawn as wheelie bins, whose lid opens while an item is over them (moments 1 and 2).
   - `after/2-layout/`: step 2, upright screens with the bins in the middle and the item at the bottom; side by side on sideways phones and desktops (moments 1 and 3).
+  - `after/3-status-bar/`: step 3, a one-row status bar (leave, progress, score; 85 → 32px tall) and the lives right on top of the bins (on phones from y = 21 to y = 122–146, next to the bins), also after a lost life with a streak. Two places for the lives were tried: `compare/3-lives-options-A-above-bins-B-beside-item.jpg`. A (on top of the bins) was chosen: B put the hearts beside the item, which crowded the bottom of the smallest phone.
 - `compare/`: before (top) and after (bottom), per step.
 
 Each set shows the same four moments at six sizes: **1** the first item, **2** dragging it over its bin, **3** the "right" feedback, **4** the "not quite" feedback. Sizes: 320 × 568 (smallest iPhone), 375 × 667, 390 × 844, 844 × 390 (phone held sideways), 768 × 1024 (tablet), 1440 × 900 (desktop). The item order is seeded, so before and after show the same items.
