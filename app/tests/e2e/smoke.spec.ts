@@ -72,15 +72,49 @@ test('on a landscape phone the "Not quite" sheet fits, with Got it on screen', a
   await expect(sheet.getByRole('button', { name: 'Got it' })).toBeInViewport({ ratio: 1 })
 })
 
+type Box = { x: number; y: number; width: number; height: number }
+const overlaps = (a: Box, b: Box) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+
+// Design review 26 Oct: the round fills the screen without scrolling or overlapping, at the start and once
+// a "Right!" card has appeared. On upright screens the bins are in the middle and the item sits below them, in thumb reach.
+async function expectRoundLayout(page: Page, isUpright: boolean) {
+  const scroll = await page.evaluate(() => ({
+    x: document.documentElement.scrollWidth - window.innerWidth,
+    y: document.documentElement.scrollHeight - window.innerHeight,
+  }))
+  expect(scroll.x).toBeLessThanOrEqual(0)
+  expect(scroll.y).toBeLessThanOrEqual(0)
+  await expectRoundFits(page)
+  await expect(itemFigure(page)).toBeInViewport({ ratio: 1 })
+
+  const item = await itemFigure(page).boundingBox()
+  const bins = await page.getByRole('group', { name: 'Bins' }).boundingBox()
+  if (!item || !bins) throw new Error('Item or bins not on screen')
+  expect(overlaps(item, bins)).toBe(false)
+  if (isUpright) expect(item.y).toBeGreaterThanOrEqual(bins.y + bins.height)
+}
+
 for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+  { width: 844, height: 390 },
   { width: 768, height: 1024 },
   { width: 1440, height: 900 },
 ]) {
-  test(`no sideways scrolling, and the round fits, at ${width}px wide`, async ({ page }) => {
+  test(`the round fits ${width} × ${height} without scrolling or overlapping, also after "Right!"`, async ({ page }) => {
+    // Reduced motion, so the boxes are measured at rest: mid-entrance, the turning item's box is briefly bigger.
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.setViewportSize({ width, height })
     await startRound(page)
-    await expectNoSideways(page)
-    await expectRoundFits(page)
+    await expectRoundLayout(page, height > width)
+
+    const item = await currentItem(page)
+    await binButton(page, item.bin).click()
+    await expect(page.getByText('Right!')).toBeVisible()
+    await expect(itemFigure(page)).not.toHaveText(item.name)
+    await expectRoundLayout(page, height > width)
   })
 }
 

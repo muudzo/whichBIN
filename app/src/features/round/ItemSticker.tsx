@@ -20,12 +20,12 @@ type Props = {
   onDrop?: (point: Point) => void
 }
 
+// The bins are the big targets; the item sits below them in the tray (design review 26 Oct).
 // On phones the sticker follows the screen's height, so the lives bar and all six bins always fit.
-// On tablets and desktops it follows the width and is the biggest thing on screen (UI 102 hierarchy).
 // max-md: keeps the height rules to phones; otherwise they would override the md: and lg: sizes.
 const SIZES = {
   md: 'size-28',
-  lg: 'size-32 max-md:short:size-24 max-md:short:p-2 max-md:tall:size-40 md:size-48 lg:size-56',
+  lg: 'size-28 max-md:short:size-20 max-md:short:p-2 max-md:tall:size-32 md:size-36 landscape-phone:size-24 lg:size-48',
 } as const
 
 // While dragged, the sticker shrinks to about this size on screen (px) on every device, so the bin under it stays visible.
@@ -117,7 +117,7 @@ export function ItemSticker({ item, size = 'lg', tilt = -3, shouldHint = false, 
       {/* The name fades while dragging, so it doesn't trail over the bins' labels */}
       <motion.figcaption
         animate={{ opacity: isDragging ? 0 : 1 }}
-        className="text-center font-heading text-title font-extrabold tall:text-heading"
+        className="text-center font-heading text-title font-extrabold lg:text-heading"
       >
         {item.name}
       </motion.figcaption>

@@ -11,6 +11,16 @@
 @custom-variant tall (@media (min-height: 740px));
 /* A phone held sideways: wide but at most 500px tall. The round screen goes side by side there. */
 @custom-variant landscape-phone (@media (orientation: landscape) and (max-height: 500px));
+/* Where the round screen goes side by side: a phone held sideways, or a desktop (lg, 64rem and up).
+   Two cases, so the long form: the styles are copied into each @slot. */
+@custom-variant side-by-side {
+  @media (orientation: landscape) and (max-height: 500px) {
+    @slot;
+  }
+  @media (width >= 64rem) {
+    @slot;
+  }
+}
 
 @theme inline {
   --font-sans: var(--font-body);
@@ -44,6 +54,30 @@
   border: 3px solid var(--color-ink);
   border-radius: var(--radius-sticker);
   box-shadow: var(--shadow-sticker);
+}
+
+/* The round screen's layout (design review 26 Oct): one grid with named areas, so where each part sits is decided here.
+   Upright phones and tablets: status bar, feedback, the bins in the middle, the item at the bottom in thumb reach.
+   The free height is shared 2 : 1 between the bins and the tray, so no single empty band opens up on tall screens.
+   Side by side (phones held sideways, desktops): the item on the left, the bins on the right. */
+@utility round-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto 2fr 1fr;
+  grid-template-areas:
+    "hud"
+    "feedback"
+    "bins"
+    "tray";
+
+  @variant side-by-side {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "hud hud"
+      "feedback bins"
+      "tray bins";
+  }
 }
 
 /* The Frisian flag's diagonal blue and white stripes, used as a band. */

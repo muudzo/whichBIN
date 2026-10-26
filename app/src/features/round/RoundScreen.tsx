@@ -135,64 +135,70 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
   const isFirstItem = roundNumber === 1 && state.index === 0 && state.answers.length === 0
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 landscape-phone:max-w-3xl landscape-phone:gap-2 landscape-phone:pt-2 md:max-w-xl md:px-8 lg:max-w-5xl lg:gap-8">
-      <Hud
-        lives={state.lives}
-        score={state.score}
-        streak={state.streak}
-        itemNumber={Math.min(state.index + 1, state.items.length)}
-        itemCount={state.items.length}
-        onLeave={onRequestLeave}
-      />
+    // The areas (hud, feedback, bins, tray) are placed by `round-layout` in global.css: upright, the bins sit in the
+    // middle and the item at the bottom; side by side (phones held sideways, desktops), the item left and the bins right.
+    // h-dvh, not min-h-dvh: with a fixed height the grid shares out the screen's height. With only a minimum, it works
+    // the 2 : 1 split out from the content instead, and the page grows past the screen.
+    <main className="round-layout mx-auto h-dvh w-full max-w-md gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:gap-y-2 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12 lg:gap-y-6">
+      <div className="[grid-area:hud]">
+        <Hud
+          lives={state.lives}
+          score={state.score}
+          streak={state.streak}
+          itemNumber={Math.min(state.index + 1, state.items.length)}
+          itemCount={state.items.length}
+          onLeave={onRequestLeave}
+        />
+      </div>
 
-      {/* UI 102 grid: one column on an upright phone; side by side (item left, bins right)
-          on a phone held sideways (bins get 3/5 of the width, so their hints wrap less) and on a desktop. */}
-      <div className="flex flex-1 flex-col gap-4 short:gap-2 landscape-phone:grid landscape-phone:grid-cols-[2fr_3fr] landscape-phone:items-center landscape-phone:gap-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
-        <div className="flex flex-1 flex-col gap-4 short:gap-2">
-          {/* Feedback on the previous item sits above the new one and names it,
-              so "Right!" can never be read as the answer for the item now on screen. */}
-          <div aria-live="polite" className="flex min-h-16 items-center justify-center landscape-phone:min-h-12">
-            {rightItem && state.phase === 'sorting' ? (
-              <motion.div
-                key={rightItem.id}
-                initial={{ y: -8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
-              >
-                <p className="flex items-center gap-2 text-small font-bold text-meadow">
-                  <Check className="size-4 shrink-0" aria-hidden="true" />
-                  Right!
-                  <span className="truncate text-ink">
-                    {rightItem.name} → {binFor(rightItem.bin).name}
-                  </span>
-                </p>
-                <p className="line-clamp-2 text-small leading-snug text-ink-muted">{rightItem.why}</p>
-              </motion.div>
-            ) : (
-              <p className={`text-center text-small ${isFirstItem ? 'font-bold text-ink' : 'text-ink-muted'}`}>
-                Drag it to its bin in Leeuwarden, or tap the bin
-              </p>
-            )}
-          </div>
+      {/* Feedback on the previous item names it, so "Right!" can never be read as the answer for the item now on screen. */}
+      <div aria-live="polite" className="flex min-h-16 items-center justify-center [grid-area:feedback] landscape-phone:min-h-12">
+        {rightItem && state.phase === 'sorting' ? (
+          <motion.div
+            key={rightItem.id}
+            initial={{ y: -8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
+          >
+            <p className="flex items-center gap-2 text-small font-bold text-meadow">
+              <Check className="size-4 shrink-0" aria-hidden="true" />
+              Right!
+              <span className="truncate text-ink">
+                {rightItem.name} → {binFor(rightItem.bin).name}
+              </span>
+            </p>
+            <p className="line-clamp-2 text-small leading-snug text-ink-muted">{rightItem.why}</p>
+          </motion.div>
+        ) : (
+          <p className={`text-center text-small ${isFirstItem ? 'font-bold text-ink' : 'text-ink-muted'}`}>
+            Drag it to its bin in Leeuwarden, or tap the bin
+          </p>
+        )}
+      </div>
 
-          <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center">
-            <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
-              {item && (
-                <ItemSticker
-                  key={item.id}
-                  item={item}
-                  shouldHint={isFirstItem}
-                  onPickUp={isAnswerable ? handlePickUp : undefined}
-                  onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
-                  onDrop={isAnswerable ? handleDrop : undefined}
-                />
-              )}
-            </AnimatePresence>
-          </section>
-        </div>
+      {/* In the code the item comes before the bins, which is the order a screen reader reads them in;
+          on screen, the grid areas put the item at the bottom. Upright, it sits at the top of its area, right under the bins. */}
+      <section aria-label="Item to sort" className="flex flex-col items-center justify-start [grid-area:tray] side-by-side:justify-center">
+        <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
+          {item && (
+            <ItemSticker
+              key={item.id}
+              item={item}
+              shouldHint={isFirstItem}
+              onPickUp={isAnswerable ? handlePickUp : undefined}
+              onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
+              onDrop={isAnswerable ? handleDrop : undefined}
+            />
+          )}
+        </AnimatePresence>
+      </section>
 
+      {/* The bins grow into the free height, up to a limit (flex-1 + max-h), a little more on tall screens.
+          Upright, they keep close to the item below them (justify-end), so leftover space never lengthens the drag. */}
+      <div className="flex flex-col justify-end [grid-area:bins] side-by-side:justify-center">
         <BinGrid
           ref={binsRef}
+          className="max-h-80 flex-1 grid-rows-[1fr_1fr] tall:max-h-96 md:tall:max-h-[30rem]"
           isDisabled={!isAnswerable}
           highlighted={hoveredBin}
           onSelect={handleSelect}
@@ -200,7 +206,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
       </div>
 
       {hasSaveError && (
-        <p role="status" className="text-center text-small text-ink-muted">
+        <p role="status" className="col-span-full text-center text-small text-ink-muted">
           Your answers couldn&apos;t be saved. You can keep playing.
         </p>
       )}
