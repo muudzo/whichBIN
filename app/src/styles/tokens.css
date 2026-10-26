@@ -67,6 +67,9 @@
   --shadow-sticker: 4px 4px 0 0 var(--color-ink);
   --shadow-sticker-sm: 2px 2px 0 0 var(--color-ink);
   --shadow-sticker-lift: 6px 8px 0 0 var(--color-ink);
+  /* The same hard shadow for drawn shapes (the bins), which box-shadow can't follow: drop-shadow-sticker(-sm) */
+  --drop-shadow-sticker: 4px 4px 0 var(--color-ink);
+  --drop-shadow-sticker-sm: 2px 2px 0 var(--color-ink);
 
   /* Motion */
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);

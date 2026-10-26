@@ -6,14 +6,12 @@ import { BinTarget } from './BinTarget'
 type Props = {
   ref?: Ref<HTMLDivElement>
   isDisabled?: boolean
-  // True while an item is being dragged: every bin lifts a little to show it's a place to drop.
-  isAwaitingDrop?: boolean
   highlighted?: BinId
   onSelect?: (id: BinId) => void
 }
 
 // 3 × 2 grid: six big targets in thumb reach (Fitts's law).
-export function BinGrid({ ref, isDisabled, isAwaitingDrop, highlighted, onSelect }: Props) {
+export function BinGrid({ ref, isDisabled, highlighted, onSelect }: Props) {
   return (
     <div ref={ref} className="grid grid-cols-3 gap-2 lg:gap-4" role="group" aria-label="Bins">
       {catalog.bins.map((bin, i) => (
@@ -23,7 +21,6 @@ export function BinGrid({ ref, isDisabled, isAwaitingDrop, highlighted, onSelect
           // the 1–6 key that picks this bin; only shown where bins can be picked
           shortcut={onSelect ? i + 1 : undefined}
           isDisabled={isDisabled}
-          isAwaitingDrop={isAwaitingDrop}
           isHighlighted={highlighted === bin.id}
           onSelect={onSelect}
         />

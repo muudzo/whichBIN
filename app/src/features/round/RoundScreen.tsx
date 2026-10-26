@@ -66,9 +66,8 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
   const [hasSaveError, setHasSaveError] = useState(false)
   // True while the old item animates out. Taps wait, so an answer always belongs to the item on screen.
   const [isSwapping, setIsSwapping] = useState(false)
-  // The bin the dragged item will land in, so it can light up; and whether a drag is going on, so all bins wake up.
+  // The bin the dragged item will land in, so its lid can open.
   const [hoveredBin, setHoveredBin] = useState<BinId>()
-  const [isDragging, setIsDragging] = useState(false)
   // Where the item that's leaving flies to: the bin it was sorted into (or, after a wrong answer, the right one).
   const [flyTo, setFlyTo] = useState<FlyTo>()
   const binsRef = useRef<HTMLDivElement>(null)
@@ -108,14 +107,12 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
 
   function handlePickUp() {
     targetsRef.current = binsRef.current ? measureTargets<BinId>(binsRef.current) : []
-    setIsDragging(true)
   }
 
   const binAt = (point: Point) => nearestTarget(point, targetsRef.current, DROP_TOLERANCE)
 
   // A drop on (or right next to) a bin counts exactly like a tap on that bin. Anywhere else, nothing is answered.
   function handleDrop(point: Point) {
-    setIsDragging(false)
     setHoveredBin(undefined)
     const bin = binAt(point)
     if (!bin) return
@@ -197,7 +194,6 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
         <BinGrid
           ref={binsRef}
           isDisabled={!isAnswerable}
-          isAwaitingDrop={isDragging}
           highlighted={hoveredBin}
           onSelect={handleSelect}
         />
