@@ -93,6 +93,15 @@ async function expectRoundLayout(page: Page, isUpright: boolean) {
   if (!item || !bins) throw new Error('Item or bins not on screen')
   expect(overlaps(item, bins)).toBe(false)
   if (isUpright) expect(item.y).toBeGreaterThanOrEqual(bins.y + bins.height)
+
+  // The status bar is one quiet row; the lives sit right on top of the bins, in view while sorting.
+  const hud = await page.locator('main header').boundingBox()
+  const lives = await page.getByRole('img', { name: /lives left/ }).boundingBox()
+  if (!hud || !lives) throw new Error('Status bar or lives not on screen')
+  expect(hud.height).toBeLessThanOrEqual(48)
+  const livesToBins = bins.y - (lives.y + lives.height)
+  expect(livesToBins).toBeGreaterThanOrEqual(0)
+  expect(livesToBins).toBeLessThanOrEqual(16)
 }
 
 for (const { width, height } of [

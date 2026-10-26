@@ -18,6 +18,7 @@ import { BinGrid } from './BinGrid'
 import { measureTargets, nearestTarget, type DropTarget, type Point } from './dropTarget'
 import { Hud } from './Hud'
 import { ItemSticker, type FlyTo } from './ItemSticker'
+import { Lives } from './Lives'
 import { NotQuiteSheet } from './NotQuiteSheet'
 
 // A drop this close to a bin (px), including the gaps between bins, still counts for the nearest bin.
@@ -142,9 +143,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
     <main className="round-layout mx-auto h-dvh w-full max-w-md gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:gap-y-2 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12 lg:gap-y-6">
       <div className="[grid-area:hud]">
         <Hud
-          lives={state.lives}
           score={state.score}
-          streak={state.streak}
           itemNumber={Math.min(state.index + 1, state.items.length)}
           itemCount={state.items.length}
           onLeave={onRequestLeave}
@@ -194,8 +193,10 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
       </section>
 
       {/* The bins grow into the free height, up to a limit (flex-1 + max-h), a little more on tall screens.
-          Upright, they keep close to the item below them (justify-end), so leftover space never lengthens the drag. */}
-      <div className="flex flex-col justify-end [grid-area:bins] side-by-side:justify-center">
+          Upright, they keep close to the item below them (justify-end), so leftover space never lengthens the drag.
+          The lives sit right on top of the bins and move with them: in view while sorting, without crowding the bottom. */}
+      <div className="flex flex-col justify-end gap-2 [grid-area:bins] side-by-side:justify-center">
+        <Lives lives={state.lives} streak={state.streak} />
         <BinGrid
           ref={binsRef}
           className="max-h-80 flex-1 grid-rows-[1fr_1fr] tall:max-h-96 md:tall:max-h-[30rem]"
