@@ -131,6 +131,23 @@ test('dragging the item onto its bin sorts it', async ({ page }) => {
   await expect(page.getByText('Item 2 of 10')).toBeVisible()
 })
 
+// Design review 26 Oct: the drop zone must be easy to recognise. The bin under the item opens its lid; the others stay shut.
+test('while the item is dragged over a bin, that bin opens and no other', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const from = await itemFigure(page).boundingBox()
+  const bin = await binButton(page, item.bin).boundingBox()
+  if (!from || !bin) throw new Error('Item or bin not on screen')
+
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(bin.x + bin.width / 2, bin.y + bin.height / 2, { steps: 12 })
+
+  await expect(binButton(page, item.bin)).toHaveAttribute('data-open', 'true')
+  await expect(page.locator('[data-bin-id][data-open]')).toHaveCount(1)
+  await page.mouse.up()
+})
+
 test('dropping the item outside the bins puts it back without answering', async ({ page }) => {
   await startRound(page)
   const item = await currentItem(page)
