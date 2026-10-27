@@ -1,6 +1,6 @@
 # Plan: less text, and a round that fills every screen (27 Oct 2026)
 
-**Status: agreed 27 Oct. Steps 1 and 2 built and tested 27 Oct, not committed yet; step 3 (my iPhone) still to do.** My requests, after a design review of the top of the round and a screenshot from my iPhone 11 Pro Max:
+**Status: agreed 27 Oct. Steps 1 and 2 built, tested and committed 27 Oct (`b252a99`, `d3031a6`, branch `feat/responsive-round`); step 3 (my iPhone) still to do.** My requests, after a design review of the top of the round and a screenshot from my iPhone 11 Pro Max:
 - "remove everything after No account";
 - take the Omrin guide out of the app ("we don't need to tell the user we are using Omrin's guide");
 - the blank space with the hearts in it looks weird;
