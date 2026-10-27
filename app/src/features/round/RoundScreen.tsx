@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { AnimatePresence, motion, useDragControls } from 'motion/react'
+import { useEffect, useEffectEvent, useRef, useState, type PointerEvent } from 'react'
 import type { BinId, Item } from '@/domain/catalog'
 import {
   correctCount,
@@ -134,6 +134,13 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
 
   const binAt = (point: Point) => nearestTarget(point, targetsRef.current, DROP_TOLERANCE)
 
+  // The whole tray is the handle (design review 26 Oct): pressed anywhere in it, the item jumps under the finger
+  // (snapToCursor), so the target is bigger and the drop still follows the item. A tap without a drag springs it back.
+  const dragControls = useDragControls()
+  function startDrag(event: PointerEvent) {
+    if (isAnswerable) dragControls.start(event, { snapToCursor: true })
+  }
+
   // A drop on (or right next to) a bin counts exactly like a tap on that bin. Anywhere else, nothing is answered.
   function handleDrop(point: Point) {
     setHoveredBin(undefined)
@@ -179,7 +186,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
         aria-live="polite"
         className={`flex min-h-16 items-center justify-center [grid-area:feedback] landscape-phone:min-h-12 ${explained ? 'side-by-side:hidden' : ''}`}
       >
-        {rightItem && state.phase === 'sorting' ? (
+        {rightItem && state.phase === 'sorting' && (
           <motion.div
             key={rightItem.id}
             initial={{ y: -8, opacity: 0 }}
@@ -197,12 +204,6 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
               . {rightItem.why}
             </p>
           </motion.div>
-        ) : (
-          !explained && (
-            <p className={`text-center text-small ${isFirstItem ? 'font-bold text-ink' : 'text-ink-muted'}`}>
-              Drag it to its bin in Leeuwarden, or tap the bin
-            </p>
-          )
         )}
       </div>
 
@@ -211,7 +212,11 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
           The item and the "Not quite" card share one grid cell (*:col-start-1 *:row-start-1), so the card appears where
           the item was while the item flies off to the right bin. */}
       <div className="grid [grid-area:tray] *:col-start-1 *:row-start-1">
-        <section aria-label="Item to sort" className="flex flex-col items-center justify-start side-by-side:justify-center">
+        <section
+          aria-label="Item to sort"
+          onPointerDown={startDrag}
+          className={`flex flex-col items-center justify-start side-by-side:justify-center ${isAnswerable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
+        >
           <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
             {item && state.phase === 'sorting' && (
               <ItemSticker
@@ -221,9 +226,17 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
                 onPickUp={isAnswerable ? handlePickUp : undefined}
                 onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
                 onDrop={isAnswerable ? handleDrop : undefined}
+                dragControls={dragControls}
               />
             )}
           </AnimatePresence>
+          {/* First-time players: the instruction where they're looking, under the item, until their first answer */}
+          {isFirstItem && state.phase === 'sorting' && (
+            <p className="mt-2 text-center text-small font-bold">
+              Drag it into its bin, or <span className="pointer-fine:hidden">tap</span>
+              <span className="hidden pointer-fine:inline">click</span> the bin
+            </p>
+          )}
         </section>
         {explained && (
           <NotQuiteCard
