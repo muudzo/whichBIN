@@ -240,6 +240,34 @@ test('while dragged, the item shrinks to about 64px', async ({ page }) => {
   await page.mouse.up()
 })
 
+// Design review 26 Oct: motion only where it explains something. A new item comes in straight; it used to spin in from −8°.
+test('a new item comes in straight, without spinning', async ({ page }) => {
+  await startRound(page)
+  // Record every item's rotation on every frame, from before the answer, so the whole entrance is seen
+  await page.evaluate(() => {
+    const record: Record<string, number[]> = {}
+    Object.assign(window, { rotations: record })
+    const sample = () => {
+      for (const figure of document.querySelectorAll('section[aria-label="Item to sort"] figure')) {
+        const name = figure.querySelector('figcaption')?.textContent ?? ''
+        const matrix = new DOMMatrix(getComputedStyle(figure).transform)
+        ;(record[name] ??= []).push(Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI))
+      }
+      requestAnimationFrame(sample)
+    }
+    requestAnimationFrame(sample)
+  })
+  const first = await currentItem(page)
+  await binButton(page, first.bin).click()
+  await expect(itemFigure(page)).not.toHaveText(first.name)
+  const second = await currentItem(page)
+
+  const rotationsOf = (name: string) =>
+    page.evaluate((n) => (window as unknown as { rotations: Record<string, number[]> }).rotations[n] ?? [], name)
+  await expect.poll(async () => (await rotationsOf(second.name)).length).toBeGreaterThan(30) // half a second of frames
+  expect((await rotationsOf(second.name)).filter((angle) => angle !== 0)).toEqual([])
+})
+
 test('dropping the item outside the bins puts it back without answering', async ({ page }) => {
   await startRound(page)
   const item = await currentItem(page)
