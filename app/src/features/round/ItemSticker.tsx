@@ -40,7 +40,9 @@ function centreOf(element: HTMLElement | null): Point | undefined {
   return { x: left + width / 2, y: top + height / 2 }
 }
 
-export function ItemSticker({ item, size = 'lg', tilt = -3, shouldHint = false, onPickUp, onDragMove, onDrop }: Props) {
+// The item rests straight (tilt 0): on the smallest phone, with the full "Right!" text above the bins, a tilted item's
+// corner came within a few pixels of the bins.
+export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, onPickUp, onDragMove, onDrop }: Props) {
   const url = stickerFor(item.id)
   const isDraggable = Boolean(onDrop)
   const boxRef = useRef<HTMLDivElement>(null)

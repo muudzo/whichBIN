@@ -1,7 +1,10 @@
-import { GlassWater, Leaf, Newspaper, Shirt, Signpost, Trash2, type LucideIcon } from 'lucide-react'
+import { Check, GlassWater, Leaf, Newspaper, Shirt, Signpost, Trash2, X, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { Bin, BinId } from '@/domain/catalog'
 import { BinShape } from './BinShape'
+
+// Feedback on the bin itself, where the item just went: a tick for the right bin, a cross for a wrong choice.
+export type BinMark = 'right' | 'wrong'
 
 // Icon + Dutch name + English hint carry the meaning; the drawing and its colour only help.
 const BIN_ICON: Record<BinId, LucideIcon> = {
@@ -20,10 +23,11 @@ type Props = {
   isDisabled?: boolean
   // True while an item is dragged over this bin: its lid opens and it grows, so the player sees where the item will land.
   isHighlighted?: boolean
+  mark?: BinMark
   onSelect?: (id: BinId) => void
 }
 
-export function BinTarget({ bin, shortcut, isDisabled = false, isHighlighted = false, onSelect }: Props) {
+export function BinTarget({ bin, shortcut, isDisabled = false, isHighlighted = false, mark, onSelect }: Props) {
   const Icon = BIN_ICON[bin.id]
 
   return (
@@ -31,6 +35,7 @@ export function BinTarget({ bin, shortcut, isDisabled = false, isHighlighted = f
       type="button"
       data-bin-id={bin.id}
       data-open={isHighlighted || undefined}
+      data-mark={mark}
       disabled={isDisabled || !onSelect}
       onClick={() => onSelect?.(bin.id)}
       animate={{ scale: isHighlighted ? 1.06 : 1 }}
@@ -52,6 +57,18 @@ export function BinTarget({ bin, shortcut, isDisabled = false, isHighlighted = f
         </span>
         <span className="text-small leading-tight text-ink">{bin.english}</span>
       </span>
+      {mark && (
+        // A badge on the lid's corner; it pops in so the eye catches it. Screen readers get the same news from the text feedback.
+        <motion.span
+          key={mark}
+          aria-hidden="true"
+          initial={{ scale: 0.4, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className={`absolute -top-2 -right-1 z-10 grid size-8 place-items-center rounded-full border-[3px] border-ink text-paper shadow-sticker-sm ${mark === 'right' ? 'bg-meadow' : 'bg-pompebled'}`}
+        >
+          {mark === 'right' ? <Check className="size-4" strokeWidth={3} /> : <X className="size-4" strokeWidth={3} />}
+        </motion.span>
+      )}
       {shortcut !== undefined && (
         <kbd aria-hidden="true" className="absolute top-4 right-3 hidden font-heading text-small leading-none font-bold text-ink/70 pointer-fine:block">
           {shortcut}
