@@ -1,4 +1,3 @@
-import { SourceLine } from '@/components/brand/SourceLine'
 import { Button } from '@/components/ui/button'
 import { stickerFor } from '@/features/game/stickers'
 
@@ -7,13 +6,11 @@ type Props = {
   onHowTo: () => void
   // The leaderboard and most-missed items, without having to play and save first (H7)
   onLeaderboard: () => void
-  // True when answers go to the shared database; then the screen says so before anyone plays (SCRUM-54).
-  savesAnswers?: boolean
 }
 
 // Test 1: testers didn't know what the product was. This screen says it in one line,
 // and shows the game (stickers going into bins) before anything else.
-// The stickers are small on mid-height phones (375 × 667), so Play, the leaderboard link and the privacy line all fit.
+// The stickers are small on mid-height phones (375 × 667), so Play and the links fit.
 const HERO_STICKERS = [
   { id: 'jam-jar', className: 'left-[6%] top-[14%] -rotate-12 size-16 max-md:tall:size-24 md:size-28' },
   { id: 'pizza-box', className: 'right-[4%] top-[2%] rotate-6 size-20 max-md:tall:size-28 md:size-32' },
@@ -22,7 +19,7 @@ const HERO_STICKERS = [
 
 const LINK = 'h-11 px-3 underline decoration-2'
 
-export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard, savesAnswers = false }: Props) {
+export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard }: Props) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
@@ -49,7 +46,7 @@ export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard, savesAnswers = f
         </div>
       </section>
 
-      {/* The button with its two small lines: the lines are closest to each other (4px), 16px from the button */}
+      {/* Play, the two links and one small line, 16px apart */}
       <div className="flex flex-col gap-4 short:gap-2">
         <Button size="lg" onClick={onPlay}>
           Play
@@ -66,15 +63,8 @@ export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard, savesAnswers = f
             See the leaderboard
           </Button>
         </div>
-        <div className="flex flex-col gap-1">
-          <p className="text-center text-small text-ink-muted">No account. About 2 minutes.</p>
-          {savesAnswers && (
-            <p className="text-center text-small text-ink-muted">
-              Answers are saved anonymously, to show which items people get wrong.
-            </p>
-          )}
-          <SourceLine />
-        </div>
+        {/* My decision (27 Oct): nothing after this. The pill already says "2-minute" */}
+        <p className="text-center text-small text-ink-muted">No account.</p>
       </div>
     </main>
   )

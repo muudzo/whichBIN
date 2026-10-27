@@ -111,7 +111,6 @@ export function App({ store }: Props) {
             onPlay={handlePlay}
             onHowTo={() => setScreen({ name: 'how-to' })}
             onLeaderboard={() => setScreen({ name: 'leaderboard' })}
-            savesAnswers={store.isShared}
           />
         )
       case 'how-to':

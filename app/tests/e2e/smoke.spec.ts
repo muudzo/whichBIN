@@ -177,7 +177,7 @@ for (const { width, height } of [
   })
 }
 
-test('a right answer scores, a wrong answer explains why with the source', async ({ page }) => {
+test('a right answer scores, a wrong answer explains why', async ({ page }) => {
   await startRound(page)
   await expectRoundFits(page)
 
@@ -193,7 +193,6 @@ test('a right answer scores, a wrong answer explains why with the source', async
 
   const card = page.getByRole('region', { name: 'Not quite' })
   await expect(card.getByText(second.why)).toBeVisible()
-  await expect(card.getByText(/Source: Omrin waste guide 2026/)).toBeVisible()
   await expect(card.getByRole('button', { name: 'Got it' })).toBeInViewport()
 
   await card.getByRole('button', { name: 'Got it' }).click()

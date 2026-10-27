@@ -1,5 +1,4 @@
 import { ArrowLeft } from 'lucide-react'
-import { SourceLine } from '@/components/brand/SourceLine'
 import { Button } from '@/components/ui/button'
 import { BinGrid } from '@/features/round/BinGrid'
 import { HowToSteps } from './HowToSteps'
@@ -28,12 +27,9 @@ export function HowToScreen({ onStart, onBack }: Props) {
         <BinGrid isDisabled />
       </section>
 
-      <div className="mt-auto flex flex-col gap-4">
-        <Button size="lg" onClick={onStart}>
-          Start round
-        </Button>
-        <SourceLine />
-      </div>
+      <Button size="lg" className="mt-auto" onClick={onStart}>
+        Start round
+      </Button>
     </main>
   )
 }
