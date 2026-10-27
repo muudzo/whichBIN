@@ -1,4 +1,4 @@
-import { motion, useMotionValue, type PanInfo } from 'motion/react'
+import { motion, useMotionValue, type DragControls, type PanInfo } from 'motion/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { Item } from '@/domain/catalog'
 import { stickerFor } from '@/features/game/stickers'
@@ -18,6 +18,8 @@ type Props = {
   onPickUp?: () => void
   onDragMove?: (point: Point) => void
   onDrop?: (point: Point) => void
+  // Given when something around the sticker (the round's tray) starts the drags; the sticker then doesn't listen itself.
+  dragControls?: DragControls
 }
 
 // The bins are the big targets; the item sits below them in the tray (design review 26 Oct).
@@ -28,8 +30,9 @@ const SIZES = {
   lg: 'size-28 max-md:short:size-20 max-md:short:p-2 max-md:tall:size-32 md:size-36 landscape-phone:size-24 lg:size-48',
 } as const
 
-// While dragged, the sticker shrinks to about this size on screen (px) on every device, so the bin under it stays visible.
-const DRAG_SIZE = 80
+// While dragged, the sticker shrinks to about this size on screen (px) on every device, so the name of the bin
+// under it stays readable (design review 26 Oct: 80 → 64).
+const DRAG_SIZE = 64
 
 // motion reports the finger's position on the page; the bins' positions are on the screen.
 const onScreen = ({ point }: PanInfo): Point => ({ x: point.x - window.scrollX, y: point.y - window.scrollY })
@@ -42,7 +45,7 @@ function centreOf(element: HTMLElement | null): Point | undefined {
 
 // The item rests straight (tilt 0): on the smallest phone, with the full "Right!" text above the bins, a tilted item's
 // corner came within a few pixels of the bins.
-export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, onPickUp, onDragMove, onDrop }: Props) {
+export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, onPickUp, onDragMove, onDrop, dragControls }: Props) {
   const url = stickerFor(item.id)
   const isDraggable = Boolean(onDrop)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -98,6 +101,8 @@ export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, o
       }}
       whileHover={isDraggable ? { scale: 1.03 } : undefined}
       drag={isDraggable}
+      dragControls={dragControls}
+      dragListener={!dragControls}
       dragSnapToOrigin // dropped anywhere but a bin, it springs back to where it was
       whileDrag={{ scale: dragScale, rotate: 0, zIndex: 50 }}
       onDragStart={() => {
@@ -113,7 +118,8 @@ export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, o
         onDrop?.(lastAimRef.current ?? aimPoint(info))
       }}
     >
-      <div ref={boxRef} className={`sticker grid place-items-center bg-paper p-4 ${SIZES[size]}`}>
+      {/* Picked up, it lifts: a deeper shadow under the sticker */}
+      <div ref={boxRef} className={`sticker grid place-items-center bg-paper p-4 ${SIZES[size]} ${isDragging ? 'shadow-sticker-lift' : ''}`}>
         {url && <img src={url} alt="" width={96} height={96} className="size-full" draggable={false} />}
       </div>
       {/* The name fades while dragging, so it doesn't trail over the bins' labels */}

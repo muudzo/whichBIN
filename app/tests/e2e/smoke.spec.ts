@@ -207,6 +207,39 @@ test('while the item is dragged over a bin, that bin opens and no other', async 
   await page.mouse.up()
 })
 
+// Design review 26 Oct: the whole tray is the handle. Grabbed beside the sticker, the item jumps under the finger,
+// so it still lands where the finger goes.
+test('grabbing the tray beside the item drags the item to the finger', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const tray = await page.getByRole('region', { name: 'Item to sort' }).boundingBox()
+  const sticker = await itemFigure(page).locator('div').first().boundingBox()
+  const bin = await binButton(page, item.bin).boundingBox()
+  if (!tray || !sticker || !bin) throw new Error('Tray, item or bin not on screen')
+
+  await page.mouse.move(tray.x + 12, sticker.y + sticker.height / 2) // the tray's edge, level with the sticker
+  await page.mouse.down()
+  await page.mouse.move(bin.x + bin.width / 2, bin.y + bin.height / 2, { steps: 12 })
+  await page.mouse.up()
+
+  await expect(page.getByText('Right!')).toBeVisible()
+})
+
+// While dragged, the item shrinks, so the name of the bin under it stays readable.
+test('while dragged, the item shrinks to about 64px', async ({ page }) => {
+  await startRound(page)
+  const item = await currentItem(page)
+  const from = await itemFigure(page).locator('div').first().boundingBox()
+  const bin = await binButton(page, item.bin).boundingBox()
+  if (!from || !bin) throw new Error('Item or bin not on screen')
+
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(bin.x + bin.width / 2, bin.y + bin.height / 2, { steps: 12 })
+  await expect.poll(async () => (await itemFigure(page).locator('div').first().boundingBox())?.width).toBeLessThanOrEqual(72)
+  await page.mouse.up()
+})
+
 test('dropping the item outside the bins puts it back without answering', async ({ page }) => {
   await startRound(page)
   const item = await currentItem(page)

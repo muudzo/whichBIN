@@ -120,6 +120,17 @@ describe('App', () => {
     expect(screen.getByRole('img', { name: '2 of 3 lives left' })).toBeInTheDocument()
   })
 
+  // Design review 26 Oct: first-time players get the instruction where they look, under the item, until their first answer.
+  it('says how to play under the first item, and only until the first answer', async () => {
+    const user = await startFirstRound()
+    const tray = screen.getByRole('region', { name: 'Item to sort' })
+    expect(within(tray).getByText(/into its bin/)).toBeInTheDocument()
+
+    await answerRight(user, false)
+
+    expect(screen.queryByText(/into its bin/)).not.toBeInTheDocument()
+  })
+
   it('puts a tick on the bin after a right answer', async () => {
     const user = await startFirstRound()
     const item = currentItem()
