@@ -10,7 +10,6 @@ export type FlyTo = Point | undefined
 type Props = {
   item: Item
   size?: 'md' | 'lg'
-  tilt?: number
   // A small wiggle once the item has settled, to show it can be picked up (first item of a visit).
   shouldHint?: boolean
   // Given during a round: the sticker can then be dragged onto a bin. Points are the sticker's centre on screen,
@@ -43,9 +42,10 @@ function centreOf(element: HTMLElement | null): Point | undefined {
   return { x: left + width / 2, y: top + height / 2 }
 }
 
-// The item rests straight (tilt 0): on the smallest phone, with the full "Right!" text above the bins, a tilted item's
-// corner came within a few pixels of the bins.
-export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, onPickUp, onDragMove, onDrop, dragControls }: Props) {
+// Motion only where it explains something (design review 26 Oct): the item comes in straight and lands without a wobble,
+// flies into the bin it was sorted into, and wiggles once on a visit's first item to show it can be picked up.
+// It no longer rests tilted, spins in from −8° or grows under the mouse.
+export function ItemSticker({ item, size = 'lg', shouldHint = false, onPickUp, onDragMove, onDrop, dragControls }: Props) {
   const url = stickerFor(item.id)
   const isDraggable = Boolean(onDrop)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -78,7 +78,6 @@ export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, o
         x: flyTo.x - restX,
         y: flyTo.y - restY,
         scale: 0.2,
-        rotate: 0,
         opacity: 0,
         transition: { duration: 0.35, ease: 'easeIn' as const },
       }
@@ -88,23 +87,23 @@ export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, o
   return (
     <motion.figure
       style={{ x, y }}
-      // touch-none: on a phone, dragging the sticker moves the sticker, not the page
-      className={`flex flex-col items-center gap-2 ${isDraggable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
-      initial={{ scale: 0.6, rotate: shouldHint ? tilt : tilt - 8, opacity: 0 }}
-      animate={{ scale: 1, rotate: shouldHint ? [tilt, tilt - 7, tilt + 6, tilt - 4, tilt] : tilt, opacity: 1 }}
+      // touch-none: on a phone, dragging the sticker moves the sticker, not the page. `group`: the sticker reacts to hover.
+      className={`group flex flex-col items-center gap-2 ${isDraggable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
+      initial={{ scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1, rotate: shouldHint ? [0, -7, 6, -4, 0] : 0 }}
       variants={variants}
       exit="exit"
       transition={{
-        default: { type: 'spring', stiffness: 420, damping: 22 },
+        // damped enough to land without a wobble
+        default: { type: 'spring', stiffness: 420, damping: 32 },
         // the hint wiggle waits until the sticker has landed
-        rotate: shouldHint ? { delay: 0.9, duration: 0.9, ease: 'easeInOut' } : { type: 'spring', stiffness: 420, damping: 22 },
+        rotate: shouldHint ? { delay: 0.9, duration: 0.9, ease: 'easeInOut' } : { duration: 0 },
       }}
-      whileHover={isDraggable ? { scale: 1.03 } : undefined}
       drag={isDraggable}
       dragControls={dragControls}
       dragListener={!dragControls}
       dragSnapToOrigin // dropped anywhere but a bin, it springs back to where it was
-      whileDrag={{ scale: dragScale, rotate: 0, zIndex: 50 }}
+      whileDrag={{ scale: dragScale, zIndex: 50 }}
       onDragStart={() => {
         setIsDragging(true)
         onPickUp?.()
@@ -118,8 +117,11 @@ export function ItemSticker({ item, size = 'lg', tilt = 0, shouldHint = false, o
         onDrop?.(lastAimRef.current ?? aimPoint(info))
       }}
     >
-      {/* Picked up, it lifts: a deeper shadow under the sticker */}
-      <div ref={boxRef} className={`sticker grid place-items-center bg-paper p-4 ${SIZES[size]} ${isDragging ? 'shadow-sticker-lift' : ''}`}>
+      {/* Picked up, it lifts: a deeper shadow under the sticker. Under a mouse it shows the same lift, without moving. */}
+      <div
+        ref={boxRef}
+        className={`sticker grid place-items-center bg-paper p-4 ${SIZES[size]} ${isDragging ? 'shadow-sticker-lift' : ''} ${isDraggable ? 'group-hover:shadow-sticker-lift' : ''}`}
+      >
         {url && <img src={url} alt="" width={96} height={96} className="size-full" draggable={false} />}
       </div>
       {/* The name fades while dragging, so it doesn't trail over the bins' labels */}
