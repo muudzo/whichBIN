@@ -23,7 +23,7 @@ export function HowToSteps({ className }: Props) {
         </span>
       </li>
       <li className="sticker bg-paper p-4 shadow-sticker-sm landscape-phone:p-3">
-        Every wrong answer <strong>tells you why</strong>, with Omrin&apos;s page number.
+        Every wrong answer <strong>tells you why</strong>.
       </li>
     </ol>
   )

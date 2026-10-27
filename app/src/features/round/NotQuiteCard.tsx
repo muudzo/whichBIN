@@ -2,7 +2,7 @@ import { motion } from 'motion/react'
 import { useId } from 'react'
 import { Button } from '@/components/ui/button'
 import type { BinId, Item } from '@/domain/catalog'
-import { binFor, sourceLabel } from '@/features/game/catalog'
+import { binFor } from '@/features/game/catalog'
 import type { ItemStat } from '@/services/scoreStore'
 import { communityLine } from './community'
 
@@ -40,7 +40,6 @@ export function NotQuiteCard({ item, chosen, stat, onContinue }: Props) {
         </p>
         <p className="text-body leading-snug short:text-small">{item.why}</p>
         {community && <p className="text-small font-bold">{community}</p>}
-        <p className="text-small text-ink-muted">Source: {sourceLabel(item)}</p>
       </div>
       <Button autoFocus aria-describedby={explanationId} onClick={onContinue} className="w-full">
         Got it
