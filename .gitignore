@@ -36,3 +36,10 @@ supabase/.env
 # Reinstall: npx skills add https://github.com/latent-spaces/brag --skill brag-slim -a claude-code -y
 .claude/skills/brag-slim/
 skills-lock.json
+
+# Launch video made with /brag-slim (generated, large)
+brag-output/
+brag-output-*/
+
+# Private portfolio v2 drafts, prompt excerpts and lecturer evidence pack
+/notes/portfolio-v2/

@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { AnimatePresence, motion, useDragControls } from 'motion/react'
+import { useEffect, useEffectEvent, useRef, useState, type PointerEvent } from 'react'
 import type { BinId, Item } from '@/domain/catalog'
 import {
   correctCount,
@@ -18,10 +18,14 @@ import { BinGrid } from './BinGrid'
 import { measureTargets, nearestTarget, type DropTarget, type Point } from './dropTarget'
 import { Hud } from './Hud'
 import { ItemSticker, type FlyTo } from './ItemSticker'
-import { NotQuiteSheet } from './NotQuiteSheet'
+import type { BinMark } from './BinTarget'
+import { Lives } from './Lives'
+import { NotQuiteCard } from './NotQuiteCard'
 
 // A drop this close to a bin (px), including the gaps between bins, still counts for the nearest bin.
 const DROP_TOLERANCE = 24
+// How long the tick stays on a bin after a right answer (ms): long enough to notice, gone before the next answer.
+const RIGHT_TICK_MS = 1200
 
 export interface RoundResult {
   roundNumber: number
@@ -43,7 +47,9 @@ type Props = {
   onFinish: (result: RoundResult) => void
   // The top bar's "Leave round" button (H3); the app asks before leaving.
   onRequestLeave?: () => void
-  // True while the app asks "Leave this round?": nothing can be answered behind the question (H5).
+  // The top bar's "?" button (F7); the app shows How to play over the round.
+  onRequestHelp?: () => void
+  // True while the app asks "Leave this round?" or shows How to play: nothing can be answered behind a sheet (H5).
   isPaused?: boolean
 }
 
@@ -60,17 +66,27 @@ function toResult(state: RoundState, roundNumber: number): RoundResult {
   }
 }
 
-export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, onRequestLeave, isPaused = false }: Props) {
+export function RoundScreen({
+  items,
+  roundNumber,
+  sessionId,
+  store,
+  onFinish,
+  onRequestLeave,
+  onRequestHelp,
+  isPaused = false,
+}: Props) {
   const [state, setState] = useState(() => startRound(items))
   const [stat, setStat] = useState<ItemStat>()
   const [hasSaveError, setHasSaveError] = useState(false)
   // True while the old item animates out. Taps wait, so an answer always belongs to the item on screen.
   const [isSwapping, setIsSwapping] = useState(false)
-  // The bin the dragged item will land in, so it can light up; and whether a drag is going on, so all bins wake up.
+  // The bin the dragged item will land in, so its lid can open.
   const [hoveredBin, setHoveredBin] = useState<BinId>()
-  const [isDragging, setIsDragging] = useState(false)
   // Where the item that's leaving flies to: the bin it was sorted into (or, after a wrong answer, the right one).
   const [flyTo, setFlyTo] = useState<FlyTo>()
+  // The bin that just got a right answer, for its tick. A new object each time, so a second tick restarts the timer.
+  const [tick, setTick] = useState<{ bin: BinId }>()
   const binsRef = useRef<HTMLDivElement>(null)
   // The bins' positions, measured once when the item is picked up; they don't move during a drag.
   const targetsRef = useRef<DropTarget<BinId>[]>([])
@@ -81,11 +97,27 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
   const answeredItem = answer ? itemFor(answer.itemId) : undefined
   const rightItem = answer?.correct ? answeredItem : undefined
   const wrongItem = answer && !answer.correct ? answeredItem : undefined
+  // After a wrong answer: the explanation in the tray, a cross on the chosen bin, and the right bin ticked with its lid open.
+  const explained = state.phase === 'feedback' && answer && wrongItem ? { item: wrongItem, chosen: answer.chosen } : undefined
+  const marks: Partial<Record<BinId, BinMark>> = explained
+    ? { [explained.chosen]: 'wrong', [explained.item.bin]: 'right' }
+    : tick
+      ? { [tick.bin]: 'right' }
+      : {}
+
+  useEffect(() => {
+    if (!tick) return
+    const timer = setTimeout(() => setTick(undefined), RIGHT_TICK_MS)
+    return () => clearTimeout(timer)
+  }, [tick])
 
   function apply(action: RoundAction) {
     const next = roundReducer(state, action)
     setState(next)
-    if (next.phase === 'sorting' && next.index !== state.index) setIsSwapping(true)
+    // The sticker leaves as soon as its item is answered: into its bin when right, into the right bin when wrong
+    // (the explanation then takes its place). New answers wait until it has gone.
+    const itemLeaves = state.phase === 'sorting' && (next.index !== state.index || next.phase === 'feedback')
+    if (itemLeaves && next.phase !== 'over') setIsSwapping(true)
     if (next.phase === 'over') onFinish(toResult(next, roundNumber))
   }
 
@@ -98,6 +130,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
     if (!item || !isAnswerable) return
     const correct = item.bin === bin
     setFlyTo(binCentre(correct ? bin : item.bin))
+    setTick(correct ? { bin } : undefined)
     setStat(undefined)
     store
       .submitAnswer({ sessionId, round: roundNumber, itemId: item.id, chosenBin: bin, correct })
@@ -108,14 +141,19 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
 
   function handlePickUp() {
     targetsRef.current = binsRef.current ? measureTargets<BinId>(binsRef.current) : []
-    setIsDragging(true)
   }
 
   const binAt = (point: Point) => nearestTarget(point, targetsRef.current, DROP_TOLERANCE)
 
+  // The whole tray is the handle (design review 26 Oct): pressed anywhere in it, the item jumps under the finger
+  // (snapToCursor), so the target is bigger and the drop still follows the item. A tap without a drag springs it back.
+  const dragControls = useDragControls()
+  function startDrag(event: PointerEvent) {
+    if (isAnswerable) dragControls.start(event, { snapToCursor: true })
+  }
+
   // A drop on (or right next to) a bin counts exactly like a tap on that bin. Anywhere else, nothing is answered.
   function handleDrop(point: Point) {
-    setIsDragging(false)
     setHoveredBin(undefined)
     const bin = binAt(point)
     if (!bin) return
@@ -138,83 +176,110 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
   const isFirstItem = roundNumber === 1 && state.index === 0 && state.answers.length === 0
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 landscape-phone:max-w-3xl landscape-phone:gap-2 landscape-phone:pt-2 md:max-w-xl md:px-8 lg:max-w-5xl lg:gap-8">
-      <Hud
-        lives={state.lives}
-        score={state.score}
-        streak={state.streak}
-        itemNumber={Math.min(state.index + 1, state.items.length)}
-        itemCount={state.items.length}
-        onLeave={onRequestLeave}
-      />
+    // The areas (hud, feedback, bins, tray) are placed by `round-layout` in global.css: upright, the bins sit in the
+    // middle and the item at the bottom; side by side (phones held sideways, desktops), the item left and the bins right.
+    // h-dvh, not min-h-dvh: with a fixed height the grid shares out the screen's height. With only a minimum, it works
+    // the 2 : 1 split out from the content instead, and the page grows past the screen.
+    <main className="round-layout mx-auto h-dvh w-full max-w-md gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:gap-y-2 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12 lg:gap-y-6">
+      <div className="[grid-area:hud]">
+        <Hud
+          score={state.score}
+          itemNumber={Math.min(state.index + 1, state.items.length)}
+          itemCount={state.items.length}
+          onLeave={onRequestLeave}
+          onHelp={onRequestHelp}
+        />
+      </div>
 
-      {/* UI 102 grid: one column on an upright phone; side by side (item left, bins right)
-          on a phone held sideways (bins get 3/5 of the width, so their hints wrap less) and on a desktop. */}
-      <div className="flex flex-1 flex-col gap-4 short:gap-2 landscape-phone:grid landscape-phone:grid-cols-[2fr_3fr] landscape-phone:items-center landscape-phone:gap-6 lg:grid lg:grid-cols-2 lg:items-center lg:gap-12">
-        <div className="flex flex-1 flex-col gap-4 short:gap-2">
-          {/* Feedback on the previous item sits above the new one and names it,
-              so "Right!" can never be read as the answer for the item now on screen. */}
-          <div aria-live="polite" className="flex min-h-16 items-center justify-center landscape-phone:min-h-12">
-            {rightItem && state.phase === 'sorting' ? (
-              <motion.div
-                key={rightItem.id}
-                initial={{ y: -8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
-              >
-                <p className="flex items-center gap-2 text-small font-bold text-meadow">
-                  <Check className="size-4 shrink-0" aria-hidden="true" />
-                  Right!
-                  <span className="truncate text-ink">
-                    {rightItem.name} → {binFor(rightItem.bin).name}
-                  </span>
-                </p>
-                <p className="line-clamp-2 text-small leading-snug text-ink-muted">{rightItem.why}</p>
-              </motion.div>
-            ) : (
-              <p className={`text-center text-small ${isFirstItem ? 'font-bold text-ink' : 'text-ink-muted'}`}>
-                Drag it to its bin in Leeuwarden, or tap the bin
-              </p>
+      {/* Feedback on the previous item names it, so "Right!" can never be read as the answer for the item now on screen. */}
+      {/* Side by side, the feedback row folds away while "Not quite" shows, so the card below it gets the height.
+          Upright it keeps its height, so the bins don't jump. */}
+      <div
+        aria-live="polite"
+        className={`flex min-h-16 items-center justify-center [grid-area:feedback] landscape-phone:min-h-12 ${explained ? 'side-by-side:hidden' : ''}`}
+      >
+        {rightItem && state.phase === 'sorting' && (
+          <motion.div
+            key={rightItem.id}
+            initial={{ y: -8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
+          >
+            {/* The whole explanation, never cut off: this is where the player learns why (design review 26 Oct).
+                One paragraph, the verdict in bold leading into the reason, so it takes as few lines as possible. */}
+            <p className="text-small leading-snug text-ink-muted">
+              <Check className="mr-1 inline size-4 align-[-3px] text-meadow" aria-hidden="true" />
+              <strong className="text-meadow">Right!</strong>{' '}
+              <strong className="text-ink">
+                {rightItem.name} → {binFor(rightItem.bin).name}
+              </strong>
+              . {rightItem.why}
+            </p>
+          </motion.div>
+        )}
+      </div>
+
+      {/* In the code the item comes before the bins, which is the order a screen reader reads them in;
+          on screen, the grid areas put the item at the bottom. Upright, it sits at the top of its area, right under the bins.
+          The item and the "Not quite" card share one grid cell (*:col-start-1 *:row-start-1), so the card appears where
+          the item was while the item flies off to the right bin. */}
+      <div className="grid [grid-area:tray] *:col-start-1 *:row-start-1">
+        <section
+          aria-label="Item to sort"
+          onPointerDown={startDrag}
+          className={`flex flex-col items-center justify-start side-by-side:justify-center ${isAnswerable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
+        >
+          <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
+            {item && state.phase === 'sorting' && (
+              <ItemSticker
+                key={item.id}
+                item={item}
+                shouldHint={isFirstItem}
+                onPickUp={isAnswerable ? handlePickUp : undefined}
+                onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
+                onDrop={isAnswerable ? handleDrop : undefined}
+                dragControls={dragControls}
+              />
             )}
-          </div>
+          </AnimatePresence>
+          {/* First-time players: the instruction where they're looking, under the item, until their first answer */}
+          {isFirstItem && state.phase === 'sorting' && (
+            <p className="mt-2 text-center text-small font-bold">
+              Drag it into its bin, or <span className="pointer-fine:hidden">tap</span>
+              <span className="hidden pointer-fine:inline">click</span> the bin
+            </p>
+          )}
+        </section>
+        {explained && (
+          <NotQuiteCard
+            item={explained.item}
+            chosen={explained.chosen}
+            stat={stat}
+            onContinue={() => apply({ type: 'continue' })}
+          />
+        )}
+      </div>
 
-          <section aria-label="Item to sort" className="flex flex-1 flex-col items-center justify-center">
-            <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
-              {item && (
-                <ItemSticker
-                  key={item.id}
-                  item={item}
-                  shouldHint={isFirstItem}
-                  onPickUp={isAnswerable ? handlePickUp : undefined}
-                  onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
-                  onDrop={isAnswerable ? handleDrop : undefined}
-                />
-              )}
-            </AnimatePresence>
-          </section>
-        </div>
-
+      {/* The bins grow into the free height, up to a limit (flex-1 + max-h), a little more on tall screens.
+          Upright, they keep close to the item below them (justify-end), so leftover space never lengthens the drag.
+          The lives sit right on top of the bins and move with them: in view while sorting, without crowding the bottom. */}
+      <div className="flex flex-col justify-end gap-2 [grid-area:bins] side-by-side:justify-center">
+        <Lives lives={state.lives} streak={state.streak} />
         <BinGrid
           ref={binsRef}
+          className="max-h-80 flex-1 grid-rows-[1fr_1fr] tall:max-h-96 md:tall:max-h-[30rem]"
           isDisabled={!isAnswerable}
-          isAwaitingDrop={isDragging}
-          highlighted={hoveredBin}
+          highlighted={explained ? explained.item.bin : hoveredBin}
+          marks={marks}
           onSelect={handleSelect}
         />
       </div>
 
       {hasSaveError && (
-        <p role="status" className="text-center text-small text-ink-muted">
+        <p role="status" className="col-span-full text-center text-small text-ink-muted">
           Your answers couldn&apos;t be saved. You can keep playing.
         </p>
       )}
-
-      <NotQuiteSheet
-        item={wrongItem}
-        stat={stat}
-        isOpen={state.phase === 'feedback'}
-        onContinue={() => apply({ type: 'continue' })}
-      />
     </main>
   )
 }

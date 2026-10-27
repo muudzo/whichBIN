@@ -4,6 +4,7 @@ import type { Item } from '@/domain/catalog'
 import { FIRST_ROUND_MUST_INCLUDE, buildRound } from '@/domain/round'
 import { catalog } from '@/features/game/catalog'
 import { HowToScreen } from '@/features/how-to/HowToScreen'
+import { HowToSheet } from '@/features/how-to/HowToSheet'
 import { LeaderboardScreen } from '@/features/leaderboard/LeaderboardScreen'
 import { LeaveRoundSheet } from '@/features/round/LeaveRoundSheet'
 import { RoundScreen, type RoundResult } from '@/features/round/RoundScreen'
@@ -37,6 +38,7 @@ export function App({ store }: Props) {
   const [roundsPlayed, setRoundsPlayed] = useState(0)
   const [lastMistakeIds, setLastMistakeIds] = useState<readonly string[]>([])
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false)
+  const [isShowingRules, setIsShowingRules] = useState(false)
   // Set while the game itself goes back to the start, so the Back handler doesn't ask again.
   const isGoingHomeRef = useRef(false)
 
@@ -66,8 +68,12 @@ export function App({ store }: Props) {
       setScreen({ name: 'welcome' })
       return
     }
-    // During a round: put the entry back, stay, and ask first.
+    // During a round: put the entry back and stay. Back closes How to play if it's open; otherwise it asks first.
     window.history.pushState(GAME_ENTRY, '')
+    if (isShowingRules) {
+      setIsShowingRules(false)
+      return
+    }
     setIsConfirmingLeave(true)
   })
 
@@ -103,6 +109,7 @@ export function App({ store }: Props) {
         return (
           <WelcomeScreen
             onPlay={handlePlay}
+            onHowTo={() => setScreen({ name: 'how-to' })}
             onLeaderboard={() => setScreen({ name: 'leaderboard' })}
             savesAnswers={store.isShared}
           />
@@ -128,9 +135,11 @@ export function App({ store }: Props) {
               store={store}
               onFinish={handleRoundFinished}
               onRequestLeave={() => setIsConfirmingLeave(true)}
-              isPaused={isConfirmingLeave}
+              onRequestHelp={() => setIsShowingRules(true)}
+              isPaused={isConfirmingLeave || isShowingRules}
             />
             <LeaveRoundSheet isOpen={isConfirmingLeave} onStay={() => setIsConfirmingLeave(false)} onLeave={goHome} />
+            <HowToSheet isOpen={isShowingRules} onClose={() => setIsShowingRules(false)} />
           </>
         )
       case 'score':
