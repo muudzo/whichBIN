@@ -43,3 +43,7 @@ brag-output-*/
 
 # Private portfolio v2 drafts, prompt excerpts and lecturer evidence pack
 /notes/portfolio-v2/
+
+# Hand-off notes for another coding agent (local only)
+HANDOVER.md
+.handover/

@@ -43,8 +43,9 @@ export function BinTarget({ bin, shortcut, isDisabled = false, isHighlighted = f
       aria-label={`${bin.name}: ${bin.english}`}
       // `group` lets the drawing inside react to this button's hover. Keyboard focus gets a solid ring around the whole target.
       // The padding keeps the label inside the drawn body, which narrows towards the bottom; the narrowest phones get
-      // less side padding so "Textielbak" still fits.
-      className="group relative flex min-h-[92px] flex-col items-center justify-center px-2 pt-4 pb-3.5 text-center min-[360px]:px-3 short:min-h-[80px] md:min-h-28 lg:min-h-32 rounded-sticker focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fries-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-default"
+      // less side padding so "Textielbak" still fits. The label sits near the top, like the sticker on a real bin: since the
+      // bins fill tall screens (27 Oct), a centred label floated in a lot of colour, and a dragged item covered it.
+      className="group relative flex min-h-[92px] flex-col items-center justify-start px-2 pt-4 pb-3.5 text-center tall:pt-7 min-[360px]:px-3 short:min-h-[80px] md:min-h-28 lg:min-h-32 rounded-sticker focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-fries-blue focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-default"
     >
       <BinShape bin={bin.id} isOpen={isHighlighted} />
       {/* `relative` puts the label above the drawing, which is absolutely positioned and would otherwise cover it */}

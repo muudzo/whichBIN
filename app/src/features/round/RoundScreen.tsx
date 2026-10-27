@@ -178,10 +178,12 @@ export function RoundScreen({
   return (
     // The areas (hud, feedback, bins, tray) are placed by `round-layout` in global.css: upright, the bins sit in the
     // middle and the item at the bottom; side by side (phones held sideways, desktops), the item left and the bins right.
-    // h-dvh, not min-h-dvh: with a fixed height the grid shares out the screen's height. With only a minimum, it works
-    // the 2 : 1 split out from the content instead, and the page grows past the screen.
-    <main className="round-layout mx-auto h-dvh w-full max-w-md gap-4 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:gap-2 short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:gap-y-2 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12 lg:gap-y-6">
-      <div className="[grid-area:hud]">
+    // A fixed height, not a minimum: then the grid shares out the screen's height instead of growing past it.
+    // svh, the height with the browser's bars shown (27 Oct): on my iPhone, Safari's floating address bar covered
+    // "Got it" at the bottom of a dvh-tall screen.
+    // No row gap: an empty feedback row would still get a gap on both sides. Each area brings its own space instead.
+    <main className="round-layout mx-auto h-svh w-full max-w-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12">
+      <div className="pb-4 [grid-area:hud] short:pb-2 lg:pb-6">
         <Hud
           score={state.score}
           itemNumber={Math.min(state.index + 1, state.items.length)}
@@ -192,18 +194,18 @@ export function RoundScreen({
       </div>
 
       {/* Feedback on the previous item names it, so "Right!" can never be read as the answer for the item now on screen. */}
-      {/* Side by side, the feedback row folds away while "Not quite" shows, so the card below it gets the height.
-          Upright it keeps its height, so the bins don't jump. */}
+      {/* Empty, it takes no room (27 Oct: no empty band above the bins); a card takes its room from the bins.
+          Side by side, it folds away while "Not quite" shows, so the card below it gets the height. */}
       <div
         aria-live="polite"
-        className={`flex min-h-16 items-center justify-center [grid-area:feedback] landscape-phone:min-h-12 ${explained ? 'side-by-side:hidden' : ''}`}
+        className={`flex items-center justify-center [grid-area:feedback] ${explained ? 'side-by-side:hidden' : ''}`}
       >
         {rightItem && state.phase === 'sorting' && (
           <motion.div
             key={rightItem.id}
             initial={{ y: -8, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="sticker w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm"
+            className="sticker mb-4 w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm short:mb-2 lg:mb-6"
           >
             {/* The whole explanation, never cut off: this is where the player learns why (design review 26 Oct).
                 One paragraph, the verdict in bold leading into the reason, so it takes as few lines as possible. */}
@@ -223,7 +225,7 @@ export function RoundScreen({
           on screen, the grid areas put the item at the bottom. Upright, it sits at the top of its area, right under the bins.
           The item and the "Not quite" card share one grid cell (*:col-start-1 *:row-start-1), so the card appears where
           the item was while the item flies off to the right bin. */}
-      <div className="grid [grid-area:tray] *:col-start-1 *:row-start-1">
+      <div className="grid pt-4 [grid-area:tray] short:pt-2 *:col-start-1 *:row-start-1">
         <section
           aria-label="Item to sort"
           onPointerDown={startDrag}
@@ -260,14 +262,15 @@ export function RoundScreen({
         )}
       </div>
 
-      {/* The bins grow into the free height, up to a limit (flex-1 + max-h), a little more on tall screens.
-          Upright, they keep close to the item below them (justify-end), so leftover space never lengthens the drag.
+      {/* Upright, the bins fill the free height (flex-1), up to a tall wheelie bin's shape (max-h-wheelie, measured
+          against this area's width: @container), and keep close to the item below them (justify-end).
+          Side by side they keep the earlier limits and sit in the middle of their column.
           The lives sit right on top of the bins and move with them: in view while sorting, without crowding the bottom. */}
-      <div className="flex flex-col justify-end gap-2 [grid-area:bins] side-by-side:justify-center">
+      <div className="@container flex flex-col justify-end gap-2 [grid-area:bins] side-by-side:justify-center">
         <Lives lives={state.lives} streak={state.streak} />
         <BinGrid
           ref={binsRef}
-          className="max-h-80 flex-1 grid-rows-[1fr_1fr] tall:max-h-96 md:tall:max-h-[30rem]"
+          className="max-h-wheelie flex-1 grid-rows-[1fr_1fr] side-by-side:max-h-80 side-by-side:tall:max-h-96 side-by-side:md:tall:max-h-[30rem]"
           isDisabled={!isAnswerable}
           highlighted={explained ? explained.item.bin : hoveredBin}
           marks={marks}

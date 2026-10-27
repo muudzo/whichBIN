@@ -41,7 +41,7 @@ export function ScoreScreen({ result, store, onNextRound, onSaved, onLeaderboard
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-12 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pt-12 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
       <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 

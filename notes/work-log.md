@@ -285,6 +285,32 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
   - a browser test at 320 × 568 and 667 × 375: the progress bar keeps at least 32px, and all three rules and the button are in sight.
 
   85 unit tests and 98 browser runs passed; the new browser tests 60 of 60 when repeated. Screenshots in `design/gameplay-ui/after/7-how-to-play/`.
+- **Merged** `feat/gameplay-ui` into `main` myself (PR #1, `f719e8a`).
+- **Design review of the top of the round** (Claude, `design-critic` skill, at my request: "the blank space we filled with hearts looks weird"), measured at nine sizes in three states:
+  - **The band:** an empty band of 82–182px sat between the top bar and the hearts. The bins stopped growing at a fixed height, and the rest collected above them, waiting for the "Right!" card.
+  - **Scrolling:** "Not quite" scrolled the page on 320 and 375px phones, hiding the top bar.
+  - **My iPhone 11 Pro Max:** my screenshot showed Safari's floating address bar covering "Got it".
+
+  Plan `notes/plans/2026-10-27-responsive-round.md`. I chose:
+  - only "No account." on the start screen;
+  - no source or date in the app;
+  - the bins filling the screen.
+- **Step 1, less text** (Claude):
+  - **Start screen:** ends at "No account." "About 2 minutes" (the pill already says it), the anonymous-saving line (SCRUM-54) and the source line are gone.
+  - **Sources:** no source line on How to play or on "Not quite" (`SourceLine.tsx` deleted, `sourceLabel` and `checkedLabel` removed from `catalog.ts`).
+  - **How to play, rule 3:** now "Every wrong answer tells you why."
+  - **Tests** written first and confirmed failing: 2 new unit tests, 1 changed.
+- **Step 2, the round fills the screen** (Claude):
+  - **Bins:** on upright screens they take all the free height (`round-layout` rows `auto auto 1fr auto` in `app/src/styles/global.css`), up to 2.4 times as tall as wide (the new `max-h-wheelie`, measured against the bins area's width with a container query).
+  - **Spacing:** the feedback row takes no room when empty, and each area brings its own spacing instead of a grid row gap.
+  - **Height:** the screens use `svh` (the height with the browser's bars shown) instead of `dvh`.
+  - **Bin labels** sit near the top of each bin.
+  - **Unchanged:** desktops and sideways phones keep their layout.
+  - **New browser test,** written first and confirmed failing at 5 of 6 sizes: at six upright sizes, in the start, "Right!" and "Not quite" states, no empty band above the hearts (at most 28px), no scrolling, the top bar and "Got it" fully on screen.
+  - **Results:** 85 unit tests and 122 browser runs passed; the new layout and sheet tests 132 of 132 when repeated; lint and build passed.
+  - Screenshots and measurements in `design/gameplay-ui/after/8-fill-the-screen/`.
+- **Handover to Codex:** `HANDOVER.md` and `.handover/`, both git-ignored.
+- **Steps 1 and 2 committed** after my yes, on the new branch `feat/responsive-round`: `b252a99` (less text), `d3031a6` (the round fills the screen). Step 1 was checked on its own first (a copy of just its files: type check, lint, 85 unit tests and build passed); step 2 again before its commit (type check, 85 unit tests, build).
 
 ### Problems and how we solved them
 | Problem | How we solved it |
@@ -301,6 +327,10 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 | The hub and each sub-skill had their own output template, so a full run could produce five files | The hub now says the sub-skills' outputs go into its one framing document; `theme-finder` now says to flag thin evidence at the top |
 | With icons, the two start-screen links needed 371px in one row; a 375 × 667 phone has 343px and only 7px of height to spare, so a second row would push Play down | Underlined text links instead of icons (315px). On a 320px phone they wrap, which fits because that screen has 68px to spare (measured) |
 | The new browser test found the rules sheet cutting off its own button: 7% on the 320 × 568 phone, all of it on the sideways phone, because the drawer is capped at 80% of the screen height | The rules scroll as a fallback, so the button always stays in sight. When sideways the sheet is wider with smaller text, so all three rules fit; the test now also checks that every rule is fully in sight |
+| The empty band above the bins was the space kept free for the "Right!" card, so taking it away means either the bins move or the bins change size when a card appears | I chose "bins fill the screen": the bins get shorter while a card shows. A grid row gap would still have left space around the empty feedback row, so each area now brings its own spacing |
+| Bins that fill the height of a tall screen got up to 2.4 times as tall as wide, and their centred labels floated in a lot of colour | Labels moved near the top of each bin, like the sticker on a real bin. With Safari's bars showing on my iPhone 11 Pro Max (414 × 715) the bins come out about 1.5 times as tall as wide |
+| Safari's floating address bar on my iPhone covered "Got it"; `env(safe-area-inset-bottom)` only covers the home indicator | The screens use `svh` instead of `dvh`. Nobody has confirmed this on a real iOS 26 iPhone, so it has to be checked on my phone (plan step 3) |
+| Steps 1 and 2 were both uncommitted in the same files, but agreed as one commit each; then `git apply --cached .handover/step1-less-text.patch` failed with "can't open patch", because I ran it from `app/` and the patch is at the repo root | Step 1 was saved as a patch and staged on its own with `git apply --cached`, run from the repo root; step 2 was then committed from what was left |
 
 ### My reflection
 - What went well:
