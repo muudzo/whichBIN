@@ -1,10 +1,10 @@
-import { Trophy } from 'lucide-react'
 import { SourceLine } from '@/components/brand/SourceLine'
 import { Button } from '@/components/ui/button'
 import { stickerFor } from '@/features/game/stickers'
 
 type Props = {
   onPlay: () => void
+  onHowTo: () => void
   // The leaderboard and most-missed items, without having to play and save first (H7)
   onLeaderboard: () => void
   // True when answers go to the shared database; then the screen says so before anyone plays (SCRUM-54).
@@ -20,7 +20,9 @@ const HERO_STICKERS = [
   { id: 'torn-tshirt', className: 'left-[34%] top-[40%] -rotate-3 size-16 max-md:tall:size-24 md:size-28' },
 ] as const
 
-export function WelcomeScreen({ onPlay, onLeaderboard, savesAnswers = false }: Props) {
+const LINK = 'h-11 px-3 underline decoration-2'
+
+export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard, savesAnswers = false }: Props) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
@@ -52,10 +54,18 @@ export function WelcomeScreen({ onPlay, onLeaderboard, savesAnswers = false }: P
         <Button size="lg" onClick={onPlay}>
           Play
         </Button>
-        {/* 44px to tap; the negative margins keep it from pushing Play off small screens */}
-        <Button variant="ghost" className="-my-2 mx-auto" onClick={onLeaderboard}>
-          <Trophy aria-hidden="true" /> See the leaderboard
-        </Button>
+        {/* Two quiet links in one row, so the screen gets no taller: a 375 × 667 phone has about 7px to spare.
+            Underlined text rather than icons, so both fit; on a 320px phone, which has room, they wrap.
+            44px to tap; the negative margins keep them from pushing Play off small screens. */}
+        <div className="-my-2 flex flex-wrap justify-center gap-x-2">
+          {/* Play shows How to play only before the first round of a visit; this opens it any time (F7) */}
+          <Button variant="ghost" className={LINK} onClick={onHowTo}>
+            How to play
+          </Button>
+          <Button variant="ghost" className={LINK} onClick={onLeaderboard}>
+            See the leaderboard
+          </Button>
+        </div>
         <div className="flex flex-col gap-1">
           <p className="text-center text-small text-ink-muted">No account. About 2 minutes.</p>
           {savesAnswers && (

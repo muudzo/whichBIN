@@ -2,7 +2,7 @@
 
 > A living list. For each line of my learning goals (`learning goals2026P1.pdf`) it shows what proves it, where that lives, how to show it in about a minute, and what's still missing. Update it whenever a deliverable lands. It lists facts only; whether the evidence is enough is for me and the assessors to judge.
 
-**Status:** Sun 25 Oct 2026 · deadline Fri 23 Oct (morning)
+**Status:** Tue 27 Oct 2026 · deadline Fri 23 Oct (morning)
 
 ## Showcase list: the headline demos
 
@@ -57,11 +57,13 @@
 
 ### Frontend
 - **Evidence now:**
+  - Gameplay screen redesigned after my design review (26–27 Oct; plan `notes/plans/2026-10-26-gameplay-ui.md`, evidence `design/gameplay-ui/`): bins drawn as wheelie bins whose lid opens under the dragged item; bins in the middle and the item at the bottom on upright screens (item → bins 323 → 272px on a 390 × 844 phone); a one-row status bar with the lives on top of the bins (two placements compared); feedback at the bins (tick, cross) with the explanation in the tray instead of a sheet over the bins; the whole tray as drag handle; calmer motion. Six commits on `feat/gameplay-ui`, each with tests written first and before/after screenshots at six sizes.
   - Responsive from 320px phones to 1440px desktops (24 Oct): the round goes side by side on desktops and on phones held sideways; browser tests check the fit at 320, 667×375, 768 and 1440 (`design/ui102/`).
-  - Drag and drop made forgiving and clearer (25 Oct): judged by where the item is, near misses count, the item shrinks and the bins lift while dragging, sorted items fly into their bin; keys 1–6 on laptops. Tested on four phones, including repeated runs.
+  - Drag and drop made forgiving and clearer (25 Oct): judged by where the item is, near misses count, the item shrinks while dragging (the bins lifting was removed on 26 Oct), sorted items fly into their bin; keys 1–6 on laptops. Tested on four phones, including repeated runs.
   - Touch drag and drop (21 Oct): drag the item onto a bin, and the bin under the finger lights up. Tapping still works. The drop check is two plain functions with 5 tests (`app/src/features/round/dropTarget.ts`).
   - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
-  - 51 unit tests, and browser tests on four phone sizes (25 passing runs), including dragging onto a bin and dropping outside the bins.
+  - How to play can be opened again (27 Oct, heuristic evaluation F7; plan `notes/plans/2026-10-27-how-to-play-again.md`): a link on the start screen, and a "?" in the round's top bar that opens the rules as a sheet while the round waits. Found from my iPad report; screenshots in `design/gameplay-ui/after/7-how-to-play/`.
+  - 85 unit tests, and browser tests on four phone profiles (98 passing runs on 27 Oct), including dragging onto a bin, dropping outside the bins, the layout at six sizes, the feedback at three and the rules sheet at two.
   - The game rules are plain, tested functions (`app/src/domain/game.ts`).
 - **Show it:** showcases 2 and 3, then walk through `roundReducer` in `app/src/domain/game.ts`: what happens on a right answer, a wrong answer and "continue". For drag and drop, explain `targetAt` in `dropTarget.ts` (how a drop becomes the same answer as a tap).
 - **Still missing:**
@@ -82,13 +84,14 @@
 
 ### Integrate, test, deploy
 - **Evidence now:**
+  - **Public link (25 Oct):** https://which-bin-leeuwarden.vercel.app, on Vercel, saving to Supabase.
   - The game saves to Supabase (25 Oct): a real round's answers and score arrived; the database works out right and wrong; through the live API, reading answers is refused and reading the leaderboard is allowed.
   - CI on GitHub Actions (`.github/workflows/ci.yml`, `docs/ci.md`): every push to `main` and every pull request runs the root tests, the app's lint, type check, unit tests and build, and the 16 database permission tests on a throwaway Postgres. Checked locally; not yet run on GitHub.
 - **Still missing:** the frontend connected to Supabase, tests of submissions, scores and permissions, and a public link (Cloudflare Pages).
 - **Jira:** SCRUM-27
 
 ### Three test iterations with international students
-- **Evidence now:** test 1 → MoSCoW change list → changes in the code. Test 2 questions drafted (`research/test-1-findings.md`).
+- **Evidence now:** test 1 → MoSCoW change list → changes in the code. Test 2 questions drafted (`research/test-1-findings.md`). A framing of test 1's open question (what is it for, beyond one round?) with extra test-2 probes: a pair of housemates on one phone, a paper sketch of a "your mistakes join the city's list" end card, and "where do you live, and who deals with the bins?" (`research/framing/2026-10-27-what-is-which-bin.md`; hypotheses, not findings).
 - **Still missing:**
   - Test 2 on the coded app.
   - Test 3.
@@ -112,6 +115,8 @@
   - Agent skill 1 (`.claude/skills/check-rule-sources/`) and its first run.
   - The MCP connectors used on 19 Oct (Figma, Atlassian, Artifact), recorded in `notes/work-log.md`.
   - `AI_USE_LOG.md`, one row per AI-made deliverable.
+  - A global agent skill, `design-critic` (26 Oct, outside this repo in `~/.claude/skills/design-critic/`): a UI/UX critic for any project, used on the gameplay redesign; includes an audit script that was checked on a page with planted problems.
+  - A global suite of six frame-creation skills (27 Oct, outside this repo in `~/.claude/skills/`; plan `notes/plans/2026-10-27-frame-skills.md`), adapted from Kees Dorst, *Frame Innovation*: `frame-creation` (the hub), `problem-archaeology`, `theme-finder`, `frame-lab`, `frame-to-action`, `design-discourse`. First real run on Which Bin: `research/framing/2026-10-27-what-is-which-bin.md`, recorded in `design/discourse.md`. The run led to three fixes in the skills. Claude wrote and ran them, so this is a first check, not an independent evaluation.
 - **Still missing:**
   - Agent skill 2 (test notes → changes log).
   - The one-page fair-use guide.

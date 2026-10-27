@@ -40,16 +40,24 @@ async function expectRoundFits(page: Page) {
 
 async function startRound(page: Page) {
   await page.goto('/')
-  await page.getByRole('button', { name: 'Play' }).click()
+  // Exact: "How to play" also contains "play"
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
   await page.getByRole('button', { name: 'Start round' }).click()
   await expect(itemFigure(page)).toBeVisible()
 }
 
-test('the welcome screen says what the game is, with Play on screen', async ({ page }) => {
+test('the welcome screen says what the game is, with Play and both links on screen', async ({ page }) => {
   await page.goto('/')
 
   await expect(page.getByRole('heading', { name: /Which\s*Bin\?/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Play' })).toBeInViewport({ ratio: FULLY })
+  const howTo = page.getByRole('button', { name: 'How to play' })
+  const leaderboard = page.getByRole('button', { name: 'See the leaderboard' })
+  for (const button of [page.getByRole('button', { name: 'Play', exact: true }), howTo, leaderboard]) {
+    await expect(button).toBeInViewport({ ratio: FULLY })
+  }
+  const [howToBox, leaderboardBox] = [await howTo.boundingBox(), await leaderboard.boundingBox()]
+  if (!howToBox || !leaderboardBox) throw new Error('Links not on screen')
+  expect(overlaps(howToBox, leaderboardBox)).toBe(false)
   await expectNoSideways(page)
 })
 
@@ -68,6 +76,31 @@ test('on a landscape phone the lives, the item and all six bins fit without scro
   await expectRoundFits(page)
   await expect(itemFigure(page)).toBeInViewport({ ratio: FULLY })
 })
+
+// F7: the "?" in the top bar opens How to play over the round. On the smallest phone the bar keeps some
+// progress bar beside the extra button, and on both small screens the sheet's button is in sight.
+for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 667, height: 375 },
+]) {
+  test(`How to play opens over the round at ${width}×${height}, with its button on screen`, async ({ page }) => {
+    await page.setViewportSize({ width, height })
+    await startRound(page)
+    const progress = await page.getByRole('progressbar', { name: 'Round progress' }).boundingBox()
+    expect(progress?.width ?? 0).toBeGreaterThanOrEqual(32)
+
+    await page.getByRole('button', { name: 'How to play' }).click()
+    const sheet = page.getByRole('dialog', { name: 'How to play' })
+    const back = sheet.getByRole('button', { name: 'Back to the round' })
+    await expect(back).toBeInViewport({ ratio: FULLY })
+    // All three rules in sight without scrolling (the rules only scroll as a fallback, e.g. when zoomed in)
+    for (const rule of await sheet.getByRole('listitem').all()) await expect(rule).toBeInViewport({ ratio: FULLY })
+    await back.click()
+
+    await expect(sheet).toBeHidden()
+    await expectNoSideways(page)
+  })
+}
 
 // Design review 26 Oct: after a wrong answer the explanation sits in the tray, so all six bins stay in sight.
 for (const { width, height } of [

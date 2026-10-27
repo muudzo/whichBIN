@@ -1,6 +1,6 @@
 # Plan: a clearer, calmer round screen (26 Oct 2026)
 
-**Status: agreed 26 Oct, steps 0 and 1 first.** One step at a time: Claude builds a step, shows before and after screenshots, I review, Claude proposes the commit (files and message), I say yes or no. One commit per step.
+**Status: done 27 Oct.** Commits: step 0 `a57cd72`, 1 `0db109b`, 2 `3c7eb4a`, 3 `8969bbb`, 4 `8895408`, 5 `e3e2465`, 6 `eec713f` (steps 3–6 committed as each passed its tests, as agreed on 26 Oct). Still to do: the bins move up about 30px when "Not quite" appears; the dragged item covers the middle of a bin's name. Earlier status: agreed 26 Oct, steps 0 and 1 first. One step at a time: Claude builds a step, shows before and after screenshots, I review, Claude proposes the commit (files and message), I say yes or no. One commit per step.
 
 **Why:** feedback from my design review (26 Oct 2026) on the gameplay screen. Keep the brand, the rules and every feature; don't redesign the game.
 

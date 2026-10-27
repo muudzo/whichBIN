@@ -224,6 +224,36 @@ describe('App', () => {
     expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
   })
 
+  // F7 (H10): the rules can be checked during a round, and the round waits
+  it('opens How to play over the round from the top bar; the round waits, then goes on with the same item', async () => {
+    const user = await startFirstRound()
+    const item = currentItem()
+
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+    const sheet = await screen.findByRole('dialog', { name: 'How to play' })
+    expect(within(sheet).getByText('3 lives')).toBeInTheDocument()
+    await user.keyboard(String(catalog.bins.findIndex((bin) => bin.id === item.bin) + 1))
+    expect(screen.queryByText('Right!')).not.toBeInTheDocument()
+
+    await user.click(within(sheet).getByRole('button', { name: 'Back to the round' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'How to play' })).not.toBeInTheDocument())
+    expect(currentItem().id).toBe(item.id)
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
+  it("closes How to play with the phone's Back button, without asking to leave the round", async () => {
+    const user = await startFirstRound()
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+    await screen.findByRole('dialog', { name: 'How to play' })
+
+    act(() => window.history.back())
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'How to play' })).not.toBeInTheDocument())
+    expect(screen.queryByRole('dialog', { name: 'Leave this round?' })).not.toBeInTheDocument()
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
   // F1 (H3): the phone's Back button stays in the game; during a round it asks first
   it("asks before the phone's Back button leaves a round, then goes back to the start", async () => {
     const user = await startFirstRound()
@@ -244,6 +274,19 @@ describe('App', () => {
     act(() => window.history.back())
 
     expect(await screen.findByRole('heading', { name: /Which\s*Bin\?/ })).toBeInTheDocument()
+  })
+
+  // F7 (H10): Play shows How to play only before the first round of a visit, so the start screen opens it again
+  it('opens How to play from the start screen, even after a round has been started', async () => {
+    const user = await startFirstRound()
+    await user.click(screen.getByRole('button', { name: 'Leave round' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Leave this round?' })
+    await user.click(within(sheet).getByRole('button', { name: 'Leave' }))
+    await screen.findByRole('heading', { name: /Which\s*Bin\?/ })
+
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+
+    expect(await screen.findByRole('heading', { name: 'How to play' })).toBeInTheDocument()
   })
 
   // F5 (H7, H6): the community results are reachable without saving a score

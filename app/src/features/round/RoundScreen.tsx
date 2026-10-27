@@ -47,7 +47,9 @@ type Props = {
   onFinish: (result: RoundResult) => void
   // The top bar's "Leave round" button (H3); the app asks before leaving.
   onRequestLeave?: () => void
-  // True while the app asks "Leave this round?": nothing can be answered behind the question (H5).
+  // The top bar's "?" button (F7); the app shows How to play over the round.
+  onRequestHelp?: () => void
+  // True while the app asks "Leave this round?" or shows How to play: nothing can be answered behind a sheet (H5).
   isPaused?: boolean
 }
 
@@ -64,7 +66,16 @@ function toResult(state: RoundState, roundNumber: number): RoundResult {
   }
 }
 
-export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, onRequestLeave, isPaused = false }: Props) {
+export function RoundScreen({
+  items,
+  roundNumber,
+  sessionId,
+  store,
+  onFinish,
+  onRequestLeave,
+  onRequestHelp,
+  isPaused = false,
+}: Props) {
   const [state, setState] = useState(() => startRound(items))
   const [stat, setStat] = useState<ItemStat>()
   const [hasSaveError, setHasSaveError] = useState(false)
@@ -176,6 +187,7 @@ export function RoundScreen({ items, roundNumber, sessionId, store, onFinish, on
           itemNumber={Math.min(state.index + 1, state.items.length)}
           itemCount={state.items.length}
           onLeave={onRequestLeave}
+          onHelp={onRequestHelp}
         />
       </div>
 
