@@ -40,7 +40,7 @@ export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay,
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       <h1 className="flex items-center gap-2 font-heading text-heading font-extrabold">
         <Trophy className="size-8 text-fries-blue" aria-hidden="true" /> Leaderboard
       </h1>
