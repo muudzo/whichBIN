@@ -96,21 +96,48 @@ describe('App', () => {
     expect(screen.getByText(`${item.name} → ${binFor(item.bin).name}`)).toBeInTheDocument()
   })
 
-  it('explains a wrong answer with the source, then continues', async () => {
+  // Design review 26 Oct: the explanation sits in the tray, not in a sheet over the bins, so the player can see
+  // which bin was chosen (a cross) and which was right (a tick, lid open) while reading why.
+  it('explains a wrong answer next to the bins, marks both bins, and Enter continues', async () => {
     const user = await startFirstRound()
     const item = currentItem()
+    const wrongBin = binButton(item, false)
 
-    await user.click(binButton(item, false))
+    await user.click(wrongBin)
 
-    const sheet = await screen.findByRole('dialog')
-    expect(within(sheet).getByText('Not quite')).toBeInTheDocument()
-    expect(within(sheet).getByText(item.why)).toBeInTheDocument()
-    expect(within(sheet).getByText(/Source: Omrin waste guide 2026/)).toBeInTheDocument()
+    const card = await screen.findByRole('region', { name: 'Not quite' })
+    expect(within(card).getByText(item.why)).toBeInTheDocument()
+    expect(within(card).getByText(`You chose ${wrongBin.getAttribute('aria-label')?.split(':')[0]}.`)).toBeInTheDocument()
+    expect(within(card).getByText(/Source: Omrin waste guide 2026/)).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(wrongBin).toHaveAttribute('data-mark', 'wrong')
+    expect(binButton(item, true)).toHaveAttribute('data-mark', 'right')
+    expect(within(card).getByRole('button', { name: 'Got it' })).toHaveFocus()
 
-    await user.click(within(sheet).getByRole('button', { name: 'Got it' }))
+    await user.keyboard('{Enter}')
 
     expect(await screen.findByText('Item 2 of 10')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: '2 of 3 lives left' })).toBeInTheDocument()
+  })
+
+  // Design review 26 Oct: first-time players get the instruction where they look, under the item, until their first answer.
+  it('says how to play under the first item, and only until the first answer', async () => {
+    const user = await startFirstRound()
+    const tray = screen.getByRole('region', { name: 'Item to sort' })
+    expect(within(tray).getByText(/into its bin/)).toBeInTheDocument()
+
+    await answerRight(user, false)
+
+    expect(screen.queryByText(/into its bin/)).not.toBeInTheDocument()
+  })
+
+  it('puts a tick on the bin after a right answer', async () => {
+    const user = await startFirstRound()
+    const item = currentItem()
+
+    await user.click(binButton(item, true))
+
+    expect(binButton(item, true)).toHaveAttribute('data-mark', 'right')
   })
 
   it('puts the glass items in round 1 (test 1 finding)', async () => {
@@ -145,7 +172,7 @@ describe('App', () => {
     const user = await startFirstRound(store)
 
     await user.click(binButton(currentItem(), false))
-    await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Got it' }))
+    await user.click(await screen.findByRole('button', { name: 'Got it' }))
     await screen.findByText('Item 2 of 10')
     for (let i = 1; i < 10; i += 1) {
       await answerRight(user, i === 9)
@@ -165,7 +192,7 @@ describe('App', () => {
     const user = await startFirstRound()
     for (let i = 0; i < 3; i += 1) {
       await user.click(binButton(currentItem(), false))
-      await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Got it' }))
+      await user.click(await screen.findByRole('button', { name: 'Got it' }))
       if (i < 2) await screen.findByText(`Item ${i + 2} of 10`)
     }
 
@@ -197,6 +224,36 @@ describe('App', () => {
     expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
   })
 
+  // F7 (H10): the rules can be checked during a round, and the round waits
+  it('opens How to play over the round from the top bar; the round waits, then goes on with the same item', async () => {
+    const user = await startFirstRound()
+    const item = currentItem()
+
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+    const sheet = await screen.findByRole('dialog', { name: 'How to play' })
+    expect(within(sheet).getByText('3 lives')).toBeInTheDocument()
+    await user.keyboard(String(catalog.bins.findIndex((bin) => bin.id === item.bin) + 1))
+    expect(screen.queryByText('Right!')).not.toBeInTheDocument()
+
+    await user.click(within(sheet).getByRole('button', { name: 'Back to the round' }))
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'How to play' })).not.toBeInTheDocument())
+    expect(currentItem().id).toBe(item.id)
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
+  it("closes How to play with the phone's Back button, without asking to leave the round", async () => {
+    const user = await startFirstRound()
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+    await screen.findByRole('dialog', { name: 'How to play' })
+
+    act(() => window.history.back())
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'How to play' })).not.toBeInTheDocument())
+    expect(screen.queryByRole('dialog', { name: 'Leave this round?' })).not.toBeInTheDocument()
+    expect(screen.getByText('Item 1 of 10')).toBeInTheDocument()
+  })
+
   // F1 (H3): the phone's Back button stays in the game; during a round it asks first
   it("asks before the phone's Back button leaves a round, then goes back to the start", async () => {
     const user = await startFirstRound()
@@ -217,6 +274,19 @@ describe('App', () => {
     act(() => window.history.back())
 
     expect(await screen.findByRole('heading', { name: /Which\s*Bin\?/ })).toBeInTheDocument()
+  })
+
+  // F7 (H10): Play shows How to play only before the first round of a visit, so the start screen opens it again
+  it('opens How to play from the start screen, even after a round has been started', async () => {
+    const user = await startFirstRound()
+    await user.click(screen.getByRole('button', { name: 'Leave round' }))
+    const sheet = await screen.findByRole('dialog', { name: 'Leave this round?' })
+    await user.click(within(sheet).getByRole('button', { name: 'Leave' }))
+    await screen.findByRole('heading', { name: /Which\s*Bin\?/ })
+
+    await user.click(screen.getByRole('button', { name: 'How to play' }))
+
+    expect(await screen.findByRole('heading', { name: 'How to play' })).toBeInTheDocument()
   })
 
   // F5 (H7, H6): the community results are reachable without saving a score

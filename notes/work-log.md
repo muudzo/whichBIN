@@ -191,10 +191,16 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 - **Drag and drop made forgiving and clearer** (Claude): the drop is judged by where the sticker is, not the finger; drops up to 24px from a bin (including the gaps) count for the nearest bin (`nearestTarget`, 4 tests first); while dragged the sticker shrinks to about 80px on every device, its name fades and all bins lift; a sorted item flies into its bin (after a wrong answer, "Got it" sends it into the right one); bins are measured once per drag. Also: a one-time wiggle and bold hint on the first item; keys 1–6 pick bins on laptops (labels only with a mouse or trackpad, 1 test); a small vibration on drop on Android. 72 unit tests, 46 browser runs, drag tests repeated 36 times on four phones.
 - **Heuristic evaluation** (Claude, one evaluator, at my request; SCRUM-25): template `research/heuristic-evaluation/template.md`; results `research/heuristic-evaluation/2026-10-25-evaluator-claude.md`. 13 findings: severity 3: the phone's Back button leaves the game; severity 2: no way to leave a round, running out of lives isn't explained, no retry when the leaderboard fails, leaderboard only reachable by saving; 8 cosmetic. Plus what works, per heuristic. My own independent pass still to do.
 - **Major and minor heuristic findings fixed** (Claude, on request; plan `notes/plans/2026-10-25-heuristic-fixes.md`): F1 the phone's Back button returns to the start and asks first during a round; F2 a "Leave round" button with a "Leave this round?" sheet (Keep playing is the main button, answering paused while it's open); F3 "Out of lives" on the score screen; F4 "Try again" on a failed leaderboard; F5 "See the leaderboard" on the welcome and score screens. 8 tests first (7 app, 1 leaderboard) plus a browser test with a real Back. 80 unit tests, 50 browser runs. Screenshots in `research/heuristic-evaluation/fixes/`.
+- **Merged into `main` and pushed** (on request): GitHub's `main` went from `08094bc` to `8a16bb8` as a fast-forward, after root tests (30), type check, lint and unit tests (80) passed on the committed code. CI's first run (40219350699) didn't start: GitHub says the account is locked because of a billing issue. No job ran, so it says nothing about the code.
+- **Launch video** (Claude, with the `/brag-slim` skill): a 20-second 1080p video with its own soundtrack, built from the game's real components and item texts, for the demo (`brag-output/`, git-ignored): hook "Broken wine glass. Which bin?", the wrong answer with Omrin's source, the welcome screen, a right answer flying into the Glasbak, the leaderboard (made-up names), outro. No link shown, because the public link isn't live yet.
+- **Launch video v2, the demo opener** (Claude, `/brag-slim` re-roll, on request: v1 felt dull, and VS Code's preview played it without sound): `brag-output-2026-10-25-195033/brag.mp4` (git-ignored). A quick quiz with a 3·2·1 countdown (broken wine glass: Glasbak or Sortibak?), "It gets weirder" rapid fire (jam jar, used pizza box, batteries), the real game (welcome, drag onto the Papierbak, "Not quite" with Omrin's page highlighted), and the live link as the last scene. A new 120 BPM soundtrack: ticking tension, toms on the countdown, a drop on the reveal, sidechained bass. The sound plays in QuickTime or a browser; VS Code's preview doesn't play AAC audio.
+- **QR code in the opener** (on request): installed `qrcode` 1.5.4 (MIT) only in the video's work folder, not the app. The last scene now has a big "Scan to play" QR code for https://which-bin-leeuwarden.vercel.app; macOS's own QR reader decoded it from the final compressed video at 16.6, 18.0 and 19.5 s. A standalone `qr-which-bin.png` sits in the same folder for the demo slides.
+- **Live on Vercel** (SCRUM-27): I deployed from the command line as project `which-bin-leeuwarden` (root `app/`, the two Supabase settings in Production): https://which-bin-leeuwarden.vercel.app. Claude checked it: the live build contains the project address and the exact publishable key and no secret key; on a phone-sized browser the privacy line shows, and the leaderboard reads the real scores and most-missed items from Supabase, with no errors. Checked read-only, so no test answers were saved. `whichbin.vercel.app` and `which-bin.vercel.app` are other people's sites.
 
 ### Problems and how we solved them
 | Problem | How we solved it |
 |---|---|
+| CI's first run on GitHub failed in 4 seconds | Not the code: "The job was not started because your account is locked due to a billing issue." Needs fixing in my GitHub billing settings, then re-run |
 | The new number keys would still answer the item behind the "Leave this round?" sheet | Found while reviewing the fix: the round is paused while the sheet is open, with a test |
 | The welcome screen's new leaderboard link pushed the privacy line below the fold on 375 × 667 and 390 × 664 phones | Smaller hero stickers on mid-height phones; measured to fit at five sizes |
 | Shrinking the dragged sticker toward the grab point sent it up to 110px away from the finger when it was grabbed during its entrance animation (WebKit) | Measured it mid-drag; it now shrinks around its centre, and the drop is judged by the sticker's centre |
@@ -203,6 +209,98 @@ Where the evidence lives and what to showcase: `notes/evidence-map.md`.
 | Repeated browser runs with 4 workers timed out while opening the page (WebKit overloaded) | Not a game bug: no failure after the page loaded. With 2 workers, 60 of 60 and 36 of 36 passed |
 | One unit-test run failed once without a name in the output | Not reproduced in 13 further runs; noted |
 | Deploying: Cloudflare's tool created a Workers project instead of a Pages one, and without asking added two packages, rewired `vite.config.ts` and changed the `preview` script the browser tests and CI depend on | Undid its four file changes and removed its config; type check, 66 unit tests and 40 browser runs pass again. Hosting choice (Cloudflare or Vercel) back to me |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:
+
+---
+
+## Mon 26 Oct 2026
+
+### What we did
+- **Feedback from my design review on the gameplay screen:** plan of six steps agreed, `notes/plans/2026-10-26-gameplay-ui.md`. Decided: after a wrong answer the explanation goes in the tray so the bins stay visible; the tray holds only the current item; where the lives go is to be tried out, keeping the bottom uncrowded on small phones. New branch `feat/gameplay-ui`.
+- **Review of the round screen** (Claude): screenshots and measurements at six sizes, from 320 × 568 to 1440 × 900, in `design/gameplay-ui/before/` and its README. Gap between item and bins 4–165px; item-to-bins drags 189–506px; lives at the top of a three-row status bar; the "Right!" explanation cut off at 320px wide; a phone held sideways scrolls by 5px.
+- **Step 1, bins that look like bins** (Claude): `app/src/features/round/BinShape.tsx` draws a wheelie bin behind each bin's label (a lid wider than the body, a body narrowing towards the bottom, two wheels); "Not a bin" is a dashed outline instead. While an item is dragged over a bin, its lid tilts open; the other bins stay still (the "all bins lift" effect and the `isDragging` state removed). New tokens `--drop-shadow-sticker` and `--drop-shadow-sticker-sm`. Browser test written first: during a drag, only the bin under the item opens. 80 unit tests and 54 browser runs passed. Screenshots in `design/gameplay-ui/after/1-bins/`, before and after in `design/gameplay-ui/compare/`.
+- **Step 1 committed** after my review: `a57cd72` (plan and before screenshots), `0db109b` (the bins).
+- **Step 2, bins in the middle and the item at the bottom** (Claude): the round screen is one CSS grid with named areas (`round-layout` in `app/src/styles/global.css`): upright, the status bar, feedback, bins and the item's tray from top to bottom; side by side on sideways phones and desktops (new `side-by-side:` variant). The bins grow into the free height up to a limit; the free height is shared 2 : 1 between bins and tray, so the item stays right under the bins. Item centre → bins centre: 323 → 272px at 390 × 844, 412 → 328px on a tablet; the sideways phone no longer scrolls. In the code the item still comes before the bins, the order a screen reader reads them in. Browser test written first: at six sizes, at the start and after "Right!", nothing scrolls or overlaps and the item sits below the bins on upright screens. 80 unit tests and 70 browser runs passed; the layout test 96 of 96 times when repeated. Screenshots in `design/gameplay-ui/after/2-layout/`, measurements in its README.
+
+- **Global agent skill `design-critic`** (Claude, at my request; outside this repo, in `~/.claude/skills/design-critic/`): a reusable UI/UX critic for any project (`/design-critic`, also triggered automatically during UI work). It reviews before major changes, challenges weak decisions, checks the rendered interface at several screen sizes, and reports what still needs work, using Nielsen, Gestalt, Fitts and WCAG where they help. Includes `references/principles.md`, `references/verification.md` and `scripts/audit.mjs`, which screenshots a page at seven sizes and flags sideways scroll, small or overlapping targets, unnamed controls, small text, likely low contrast and images without alt. The script was checked on a page with planted problems (every check fired) and on a Which Bin round (no findings).
+- **Step 2 committed** after my yes (`3c7eb4a`); steps 3–6 to be committed one by one once their tests pass (my answer, 26 Oct).
+- **Step 3, a one-row status bar and the lives on top of the bins** (Claude): `Hud.tsx` is now one row (leave, progress with "Item n of 10", score), 85 → 32px tall; the hearts and the streak moved to a new `Lives.tsx`, placed right on top of the bins and moving with them. Two places were tried with screenshots: on top of the bins, or beside the item (`design/gameplay-ui/compare/3-lives-options-A-above-bins-B-beside-item.jpg`); beside the item crowded the bottom of the smallest phone, so on top of the bins was kept. The layout test now also checks, at six sizes, that the status bar is one row and the lives sit 0–16px above the bins (it failed on step 2's code, then passed). 80 unit tests, 70 browser runs passed.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| The bins' labels ran past the narrowing body: "clothes, on the" by 1px at 375px wide, and 2px from the bottom edge at 320px | Measured each label against the drawn body; more side padding from 360px wide, less on the narrowest phones so "Textielbak" fits; 2px less above the icon, so the bins didn't get taller |
+| The first item of the seeded round goes in "Not a bin", which has no lid, so the drag screenshot couldn't show a lid opening | The capture hovers over the Papierbak first, then drops on the right bin; the before set was re-taken the same way from commit `8a16bb8` |
+| Running all browser tests rewrites the captures in `design/screens/` | Restored them; they'll be refreshed once at the end of the plan |
+| The grid's base rules were missing from the built CSS, so the round stayed one long column | The `side-by-side` variant was written on one line with a comma for "or"; Tailwind doesn't read it that way. Rewritten in its long form with one `@slot` per case, then checked in an unminified build |
+| At 375 × 667 the page scrolled by 14px once "Right!" appeared | The screen had only a minimum height, so the grid worked the 2 : 1 split out from the content (bins row = 2 × the tray). With `h-dvh` it shares out the screen's height instead |
+| At 320 × 568 the layout test failed now and then: item and bins overlapping | The item's box grows while it turns in (up to 11°) and during the first-item wiggle; less screen padding on short phones (16 → 8px) gives it room, and the test measures with reduced motion so it checks the layout at rest |
+| With only the word "Item" hidden from sight ("2 of 10" on screen), 5 unit tests no longer found "Item 2 of 10" | Showed "Item 2 of 10" in full: "2 of 10" next to the score could be read as a score, and the progress bar still has 93px or more at 320px wide |
+| On tall phones the lives drifted away from the bins (the spare height opened up between them) | The lives moved inside the bins' area, so they always sit right on top of the bins |
+
+### My reflection
+- What went well:
+- What was hard:
+- What I'd do differently:
+
+---
+
+## Tue 27 Oct 2026
+
+### What we did
+- **Step 3 committed** (`8969bbb`).
+- **Step 4, feedback next to the action** (Claude; plan `notes/plans/2026-10-26-gameplay-ui.md`): after a right answer the bin gets a tick for 1.2 s and the "Right!" card above the bins shows the whole explanation in one paragraph, never cut off. After a wrong answer the item flies straight into the right bin, which opens with a tick; the chosen bin gets a cross; the explanation (item → where it goes, why, community line, Omrin source, Got it) takes the item's place in the tray (`app/src/features/round/NotQuiteCard.tsx`), replacing the sheet that covered the bins (`NotQuiteSheet.tsx` removed). Focus moves to Got it, whose description is the explanation, so screen readers read it out and Enter continues. Tests written first: 2 new unit tests (both bins marked and Enter continues; the tick after a right answer) and a browser test at 320 × 568, 667 × 375 and 1440 × 900 that the card fits beside the bins with Got it on screen. 81 unit tests; 156 of 156 browser runs over two full passes. Screenshots in `design/gameplay-ui/after/4-feedback/`.
+
+- **Step 4 committed** (`8895408`).
+- **CI checked** (my question): none of the gameplay commits have been through CI. The branch `feat/gameplay-ui` hasn't been pushed; `ci.yml` runs on pushes to `main` and on pull requests only; its one run on GitHub (25 Oct, `40219350699`) didn't start because of the billing lock; it doesn't run the browser tests; and deploying to Vercel is still done by hand.
+- **Step 5, easier dragging and a first-time cue** (Claude): the whole tray is the handle (`useDragControls` with `snapToCursor` in `RoundScreen.tsx`): pressed anywhere in it, the item jumps under the finger, and a tap without a drag springs it back. While dragged the item shrinks to about 64px (was 80px) and gets a deeper shadow. The instruction moved from above the bins to under the first item, and shows until the first answer ("tap" on touch screens, "click" with a mouse). Tests written first: a unit test for the hint, and browser tests for grabbing the tray beside the item and for the 64px size. 82 unit tests, 86 browser runs passed; drag tests 48 of 48 when repeated.
+
+- **Step 5 committed** (`e3e2465`).
+- **Step 6, calmer motion** (Claude): a new item comes in straight instead of spinning in from −8°, lands without a wobble (spring damping 22 → 32) and no longer grows under the mouse; on hover it shows the lifted shadow instead. Kept: the fly into the bin, the lid opening, the tick and cross, and the first item's one wiggle. Browser test written first, recording the item's rotation on every frame: 8–15 tilted frames on the old code, 0 now. 82 unit tests, 90 browser runs passed.
+
+- **Preview link for a tester** (Claude, on request; I chose a preview over updating the live link): `vercel deploy` from `app/` → https://which-bin-leeuwarden-8o9iw5wlc-muudzos-projects.vercel.app (commit `eec713f`, status Ready). The live link still serves the 25 Oct version. The preview has no Supabase settings (they're set for Production only), so it plays on the local store and saves nothing. Vercel's Deployment Protection puts previews behind a Vercel login, so the tester needs a share link from the deployment page, or the protection switched off for previews.
+- **Frame-creation skills** (Claude; plan `notes/plans/2026-10-27-frame-skills.md`): six global skills adapted from Kees Dorst, *Frame Innovation*, in `~/.claude/skills/` (outside this repo):
+  - `frame-creation`, the hub;
+  - `problem-archaeology`;
+  - `theme-finder`;
+  - `frame-lab`;
+  - `frame-to-action`;
+  - `design-discourse`.
+
+  `design-critic` now suggests `frame-creation` when the brief itself looks like the wrong problem.
+- **Test run on Which Bin** (Claude): a quick pass on "what is Which Bin for?", from repo evidence only: `research/framing/2026-10-27-what-is-which-bin.md`.
+  - **Readiness, split:** "app or game" may be fidelity (test 1 used a static Figma prototype; test 2 will show); "what is it for beyond one round" is a framing question.
+  - **Core paradox:** more game (test 1 notes 5–6) against more effect on disposal (note 7).
+  - **Frames:** three themes, ten frames scored, and futures for four.
+  - **Recommendation, for me to decide:** no rebuild before test 2. Instead, probe "the house plays, the city listens" in test 2 with one pair session and a paper sketch.
+  - **Records:** frames, themes and a method card in `design/discourse.md`.
+- **"The iPad has no rules page"** (my report). Claude checked it at four iPad sizes in Safari's and Chrome's engines, locally and on the live link: How to play does show. But Play shows it only before a visit's first round (`hasSeenHowTo` in `app/src/app/App.tsx`), and nothing opened it again (heuristic evaluation F7). Plan `notes/plans/2026-10-27-how-to-play-again.md`; I chose fixes 1 and 2.
+- **Fix 1, How to play on the start screen** (Claude): a "How to play" link beside "See the leaderboard" (`WelcomeScreen.tsx`). Tests written first and confirmed failing: a unit test that it opens How to play after a round has been started, and a browser test that Play and both links are on screen at every phone size without overlapping. Browser tests now press Play by its exact name, since "How to play" also contains "play".
+- **Fix 2, "?" in the round's top bar** (Claude): it opens the three rules as a sheet over the round (`app/src/features/how-to/HowToSheet.tsx`). The round waits, Back to the round returns to the same item, and the phone's Back button closes the sheet instead of asking to leave. The three rules moved into one component (`HowToSteps.tsx`), shared by the screen and the sheet. Tests written first and confirmed failing:
+  - two unit tests: the round waits and goes on with the same item; Back closes the sheet;
+  - a browser test at 320 × 568 and 667 × 375: the progress bar keeps at least 32px, and all three rules and the button are in sight.
+
+  85 unit tests and 98 browser runs passed; the new browser tests 60 of 60 when repeated. Screenshots in `design/gameplay-ui/after/7-how-to-play/`.
+
+### Problems and how we solved them
+| Problem | How we solved it |
+|---|---|
+| With the full "Right!" text, the smallest phone (320 × 568) was about 10px too short | First tried the item's name beside the sticker on short phones; that broke dragging (the drop follows the sticker's centre, so grabbing the name landed the item about 80px from the finger) and was reverted. Instead the verdict and the reason became one paragraph, which saves a line |
+| On the smallest phone the item, resting at a 3° tilt, came within a few pixels of the bins under the longest "Right!" texts (the layout test failed now and then) | The item now rests straight; this part of step 6 (calmer motion) was brought forward |
+| The opening lid of the right bin covered the hearts, just when a life was lost | The hearts are drawn above the bins, so the lid tucks behind them |
+| Android's 2.625 pixel ratio measured fully visible bins at 0.9999999 of their size, failing "fully on screen" checks | One named tolerance in the browser tests (`FULLY = 0.99`, under 2px), with the reason in a comment |
+| A wrong answer makes the bins move up about 30px on a 390 × 844 phone, because the card is taller than the item | Not solved; noted as still to do |
+| Over a bin's centre, the dragged item (now about 64px) still covers the middle of the bin's name | Not solved in step 5; the lid, colour and icon still show the bin. A floating "→ Papierbak" label is the likely fix |
+| The first version of the "no spin" test passed on the old code: by the time it looked, the spin had already settled | The page records the item's rotation on every animation frame from before the answer, so the test sees the whole entrance; it then failed on the old code and passed on the new |
+| Test 1's notes have no date, tester count or attribution, so most of the framing's field and two of its three themes rest on assumptions | Every claim is marked evidence [E] or assumption [A]. The key assumptions became test-2 questions, and the gaps are listed at the end of the framing document |
+| The skills only allowed "reframe" or "solve directly", but one half of the question looked like fidelity and the other like framing | Added a "split" verdict to `problem-archaeology` and the hub |
+| The hub and each sub-skill had their own output template, so a full run could produce five files | The hub now says the sub-skills' outputs go into its one framing document; `theme-finder` now says to flag thin evidence at the top |
+| With icons, the two start-screen links needed 371px in one row; a 375 × 667 phone has 343px and only 7px of height to spare, so a second row would push Play down | Underlined text links instead of icons (315px). On a 320px phone they wrap, which fits because that screen has 68px to spare (measured) |
+| The new browser test found the rules sheet cutting off its own button: 7% on the 320 × 568 phone, all of it on the sideways phone, because the drawer is capped at 80% of the screen height | The rules scroll as a fallback, so the button always stays in sight. When sideways the sheet is wider with smaller text, so all three rules fit; the test now also checks that every rule is fully in sight |
 
 ### My reflection
 - What went well:

@@ -30,7 +30,7 @@ test.describe('screens', () => {
     await page.goto('/')
     await page.screenshot({ path: `${OUT}/01-welcome.png` })
 
-    await page.getByRole('button', { name: 'Play' }).click()
+    await page.getByRole('button', { name: 'Play', exact: true }).click()
     await page.screenshot({ path: `${OUT}/02-how-to-play.png`, fullPage: true })
 
     await page.getByRole('button', { name: 'Start round' }).click()
@@ -43,7 +43,7 @@ test.describe('screens', () => {
     await page.screenshot({ path: `${OUT}/04-right-answer.png` })
 
     await answer(page, false)
-    await expect(page.getByRole('dialog').getByText('Not quite')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Not quite' })).toBeVisible()
     await page.waitForTimeout(600)
     await page.screenshot({ path: `${OUT}/05-not-quite.png` })
     await page.getByRole('button', { name: 'Got it' }).click()
@@ -65,7 +65,7 @@ test.describe('screens', () => {
     test.skip(test.info().project.name !== 'iphone-se', 'Screenshots at one size only')
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto('/')
-    await page.getByRole('button', { name: 'Play' }).click()
+    await page.getByRole('button', { name: 'Play', exact: true }).click()
     await page.getByRole('button', { name: 'Start round' }).click()
     await page.waitForTimeout(500)
     await page.screenshot({ path: `${OUT}/08-round-desktop.png` })
