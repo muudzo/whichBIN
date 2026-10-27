@@ -126,6 +126,55 @@ for (const { width, height } of [
   })
 }
 
+// 27 Oct, from my iPhone 11 Pro Max: the bins fill the free height, so no empty band sits above the hearts,
+// and the page never scrolls, so the top bar stays on screen, also while "Not quite" is open.
+const BAND_MAX = 28 // the space under the top bar (or a "Right!" card) and no more
+
+async function expectNoBandAboveHearts(page: Page) {
+  const gap = await page.evaluate(() => {
+    const bottom = (selector: string) => document.querySelector(selector)?.getBoundingClientRect().bottom ?? 0
+    const lives = document.querySelector('[role=img][aria-label*="lives left"]')?.getBoundingClientRect().top ?? 0
+    return lives - Math.max(bottom('main header'), bottom('main [aria-live]'))
+  })
+  expect(gap).toBeLessThanOrEqual(BAND_MAX)
+}
+
+async function expectNothingScrolls(page: Page) {
+  const overflow = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+  expect(overflow).toBeLessThanOrEqual(0)
+  await expect(page.locator('main header')).toBeInViewport({ ratio: FULLY })
+}
+
+for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+  { width: 414, height: 896 },
+  { width: 430, height: 932 },
+  { width: 768, height: 1024 },
+]) {
+  test(`the round fills ${width} × ${height} with no empty band, and nothing scrolls`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.setViewportSize({ width, height })
+    await startRound(page)
+    await expectNoBandAboveHearts(page)
+    await expectNothingScrolls(page)
+
+    const first = await currentItem(page)
+    await binButton(page, first.bin).click()
+    await expect(page.getByText(/Right!/)).toBeVisible()
+    await expectNoBandAboveHearts(page)
+    await expectNothingScrolls(page)
+
+    await expect(itemFigure(page)).not.toHaveText(first.name)
+    const second = await currentItem(page)
+    await binButton(page, second.bin === 'sortibak' ? 'biobak' : 'sortibak').click()
+    const card = page.getByRole('region', { name: 'Not quite' })
+    await expect(card.getByRole('button', { name: 'Got it' })).toBeInViewport({ ratio: FULLY })
+    await expectNothingScrolls(page)
+  })
+}
+
 // Design review 26 Oct: the round fills the screen without scrolling or overlapping, at the start and once
 // a "Right!" card has appeared. On upright screens the bins are in the middle and the item sits below them, in thumb reach.
 async function expectRoundLayout(page: Page, isUpright: boolean) {

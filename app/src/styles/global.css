@@ -58,12 +58,14 @@
 
 /* The round screen's layout (design review 26 Oct): one grid with named areas, so where each part sits is decided here.
    Upright phones and tablets: status bar, feedback, the bins in the middle, the item at the bottom in thumb reach.
-   The free height is shared 2 : 1 between the bins and the tray, so no single empty band opens up on tall screens.
+   The bins take all the free height (1fr) and the item's tray only what it needs (auto), so no empty band opens up
+   above the bins on tall screens (27 Oct). A "Right!" card or "Not quite" takes its room from the bins, which get
+   shorter, so the page never scrolls.
    Side by side (phones held sideways, desktops): the item on the left, the bins on the right. */
 @utility round-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto 2fr 1fr;
+  grid-template-rows: auto auto 1fr auto;
   grid-template-areas:
     "hud"
     "feedback"
@@ -78,6 +80,13 @@
       "feedback bins"
       "tray bins";
   }
+}
+
+/* The bins fill the free height, but stop at a tall wheelie bin: each bin at most 2.4 times as tall as it is wide.
+   A bin is about a third of the width of the bins' area (100cqw: the area is marked @container), and there are
+   two rows, so both rows together stop at 100cqw / 3 × 2.4 × 2. Only very tall tablets reach it. */
+@utility max-h-wheelie {
+  max-height: calc(100cqw / 3 * 2.4 * 2);
 }
 
 /* The Frisian flag's diagonal blue and white stripes, used as a band. */
@@ -98,7 +107,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   body {
-    @apply min-h-dvh bg-background text-foreground antialiased;
+    @apply min-h-svh bg-background text-foreground antialiased;
   }
   h1,
   h2,
