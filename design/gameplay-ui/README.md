@@ -14,6 +14,14 @@ Feedback from my design review on 26 Oct: bins that look like bins, better use o
   - **On the start screen:** a "How to play" link beside "See the leaderboard", underlined text in one row, so the screen gets no taller (a 375 × 667 phone had 7px to spare). On a 320px phone, which has room, they wrap to two lines.
   - **In a round:** a "?" at the right end of the top bar opens the rules as a sheet. The round waits, and Back returns to the same item. On a 320px phone the progress bar keeps 66px beside the extra button.
   - **The sheet** first cut off its own button on small phones (80% height cap) and hid a rule on a sideways phone. The rules now scroll as a fallback, and the sheet is wider with smaller text when sideways, so all three rules and the button are in sight at 320 × 568, 667 × 375 and 768 × 1024.
+- `after/8-fill-the-screen/` (27 Oct, plan `notes/plans/2026-10-27-responsive-round.md`). This came from a design review of the top of the round and my iPhone 11 Pro Max screenshot. The `before-` images were taken before both steps; `compare-` shows them side by side.
+  - **Less text:** the start screen ends at "No account."; no source or check date anywhere in the app.
+  - **The bins fill the free height** on upright screens, stopping at 2.4 times as tall as wide. The tray takes only what the item needs. Bin labels sit near the top, like the sticker on a real bin.
+  - **The empty band above the hearts:** 82 → under 28px at 320 × 568, 123 → under 28px at 390 × 844, 182 → under 28px at 430 × 932, 147 → under 28px at 768 × 1024.
+  - **"Not quite":** the page no longer scrolls (it scrolled 66px at 320 × 568 and 22px at 375 × 667, hiding the top bar).
+  - **Bin shape:** with Safari's bars showing on an iPhone 11 Pro Max (414 × 715) the bins come out about 1.5 times as tall as wide; full-screen heights get up to 2.4.
+  - **Unchanged:** desktops and sideways phones.
+  - **Not yet checked:** whether `svh` keeps "Got it" clear of Safari's floating address bar on a real iPhone.
 - `compare/`: before (top) and after (bottom), per step.
 
 Each set shows the same four moments at six sizes: **1** the first item, **2** dragging it over its bin, **3** the "right" feedback, **4** the "not quite" feedback. Sizes: 320 × 568 (smallest iPhone), 375 × 667, 390 × 844, 844 × 390 (phone held sideways), 768 × 1024 (tablet), 1440 × 900 (desktop). The item order is seeded, so before and after show the same items.
