@@ -15,7 +15,8 @@ export function Lives({ lives, streak }: Props) {
   const hearts = Array.from({ length: LIVES_PER_ROUND }, (_, i) => i < lives)
 
   return (
-    <div className="flex min-h-7 items-center justify-between gap-2">
+    // relative z-10: drawn above the bins, so an opening lid tucks behind the hearts instead of hiding a life
+    <div className="relative z-10 flex min-h-7 items-center justify-between gap-2">
       <div className="flex gap-1" role="img" aria-label={`${lives} of ${LIVES_PER_ROUND} lives left`}>
         {hearts.map((isAlive, i) => (
           <PompebledHeart key={i} isLost={!isAlive} className="size-6" />

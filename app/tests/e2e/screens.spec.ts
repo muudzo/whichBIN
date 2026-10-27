@@ -43,7 +43,7 @@ test.describe('screens', () => {
     await page.screenshot({ path: `${OUT}/04-right-answer.png` })
 
     await answer(page, false)
-    await expect(page.getByRole('dialog').getByText('Not quite')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Not quite' })).toBeVisible()
     await page.waitForTimeout(600)
     await page.screenshot({ path: `${OUT}/05-not-quite.png` })
     await page.getByRole('button', { name: 'Got it' }).click()

@@ -17,16 +17,24 @@ function binButton(page: Page, binId: string) {
   return page.getByRole('group', { name: 'Bins' }).getByRole('button', { name: new RegExp(`^${bin?.name}:`) })
 }
 
+// "Fully on screen". 0.99, not 1: on Android's 2.625 pixel ratio, an element that starts at a fraction of a pixel
+// measures 0.9999999 even when it's well inside the screen (measured 26 Oct). 1% of a bin or button is under 2px.
+const FULLY = 0.99
+
 async function expectNoSideways(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
   expect(overflow).toBeLessThanOrEqual(0)
 }
 
+type Box = { x: number; y: number; width: number; height: number }
+const overlaps = (a: Box, b: Box) =>
+  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+
 // The lives bar and all six bins must be on screen without scrolling, on every phone.
 async function expectRoundFits(page: Page) {
   await expect(page.getByRole('img', { name: /lives left/ })).toBeInViewport()
   for (const bin of rawCatalog.bins) {
-    await expect(binButton(page, bin.id)).toBeInViewport({ ratio: 1 })
+    await expect(binButton(page, bin.id)).toBeInViewport({ ratio: FULLY })
   }
 }
 
@@ -41,7 +49,7 @@ test('the welcome screen says what the game is, with Play on screen', async ({ p
   await page.goto('/')
 
   await expect(page.getByRole('heading', { name: /Which\s*Bin\?/ })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Play' })).toBeInViewport({ ratio: 1 })
+  await expect(page.getByRole('button', { name: 'Play' })).toBeInViewport({ ratio: FULLY })
   await expectNoSideways(page)
 })
 
@@ -58,23 +66,32 @@ test('on a landscape phone the lives, the item and all six bins fit without scro
   await startRound(page)
   await expectNoSideways(page)
   await expectRoundFits(page)
-  await expect(itemFigure(page)).toBeInViewport({ ratio: 1 })
+  await expect(itemFigure(page)).toBeInViewport({ ratio: FULLY })
 })
 
-test('on a landscape phone the "Not quite" sheet fits, with Got it on screen', async ({ page }) => {
-  await page.setViewportSize({ width: 667, height: 375 })
-  await startRound(page)
-  const item = await currentItem(page)
-  await binButton(page, item.bin === 'sortibak' ? 'biobak' : 'sortibak').click()
+// Design review 26 Oct: after a wrong answer the explanation sits in the tray, so all six bins stay in sight.
+for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 667, height: 375 },
+  { width: 1440, height: 900 },
+]) {
+  test(`at ${width} × ${height} the "Not quite" card fits beside the bins, with Got it on screen`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.setViewportSize({ width, height })
+    await startRound(page)
+    const item = await currentItem(page)
+    await binButton(page, item.bin === 'sortibak' ? 'biobak' : 'sortibak').click()
 
-  const sheet = page.getByRole('dialog')
-  await expect(sheet.getByText('Not quite')).toBeVisible()
-  await expect(sheet.getByRole('button', { name: 'Got it' })).toBeInViewport({ ratio: 1 })
-})
-
-type Box = { x: number; y: number; width: number; height: number }
-const overlaps = (a: Box, b: Box) =>
-  a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height
+    const card = page.getByRole('region', { name: 'Not quite' })
+    await expect(card.getByText(item.why)).toBeVisible()
+    await expect(card.getByRole('button', { name: 'Got it' })).toBeInViewport({ ratio: FULLY })
+    await expectRoundFits(page)
+    const cardBox = await card.boundingBox()
+    const bins = await page.getByRole('group', { name: 'Bins' }).boundingBox()
+    if (!cardBox || !bins) throw new Error('Card or bins not on screen')
+    expect(overlaps(cardBox, bins)).toBe(false)
+  })
+}
 
 // Design review 26 Oct: the round fills the screen without scrolling or overlapping, at the start and once
 // a "Right!" card has appeared. On upright screens the bins are in the middle and the item sits below them, in thumb reach.
@@ -86,7 +103,7 @@ async function expectRoundLayout(page: Page, isUpright: boolean) {
   expect(scroll.x).toBeLessThanOrEqual(0)
   expect(scroll.y).toBeLessThanOrEqual(0)
   await expectRoundFits(page)
-  await expect(itemFigure(page)).toBeInViewport({ ratio: 1 })
+  await expect(itemFigure(page)).toBeInViewport({ ratio: FULLY })
 
   const item = await itemFigure(page).boundingBox()
   const bins = await page.getByRole('group', { name: 'Bins' }).boundingBox()
@@ -141,13 +158,12 @@ test('a right answer scores, a wrong answer explains why with the source', async
   const second = await currentItem(page)
   await binButton(page, second.bin === 'sortibak' ? 'biobak' : 'sortibak').click()
 
-  const sheet = page.getByRole('dialog')
-  await expect(sheet.getByText('Not quite')).toBeVisible()
-  await expect(sheet.getByText(second.why)).toBeVisible()
-  await expect(sheet.getByText(/Source: Omrin waste guide 2026/)).toBeVisible()
-  await expect(sheet.getByRole('button', { name: 'Got it' })).toBeInViewport()
+  const card = page.getByRole('region', { name: 'Not quite' })
+  await expect(card.getByText(second.why)).toBeVisible()
+  await expect(card.getByText(/Source: Omrin waste guide 2026/)).toBeVisible()
+  await expect(card.getByRole('button', { name: 'Got it' })).toBeInViewport()
 
-  await sheet.getByRole('button', { name: 'Got it' }).click()
+  await card.getByRole('button', { name: 'Got it' }).click()
   await expect(page.getByText('Item 3 of 10')).toBeVisible()
   await expect(page.getByRole('img', { name: '2 of 3 lives left' })).toBeVisible()
 })
