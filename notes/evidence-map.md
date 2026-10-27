@@ -7,7 +7,7 @@
 ## Showcase list: the headline demos
 
 1. **Before and after.** Show Mid-fi v3 screens A1 (welcome) and C2 (round) beside the coded `design/screens/01-welcome.png` and `design/screens/03-round.png`. Export the two Figma frames from the Figma app, which uses none of the connector's reads, into `design/before-after/`.
-2. **Live on a phone.** Play one round, get one wrong to show "Not quite" with the Omrin page, then open the leaderboard.
+2. **Live on a phone.** Play one round, get one wrong to show "Not quite" with its explanation and how many other players got it wrong, then open the leaderboard. Since 27 Oct the app shows no Omrin page: the sources are in `research/rule-sources.md`, which can be shown next to it.
 3. **Tests running.** `npm test` (51 unit tests) and `npm run test:e2e` (browser tests on four phone sizes, 25 passing runs). Testing found real problems:
    - The app tests caught a timing bug: a fast tap answered the next item (fixed in `a8306e6`).
    - The screenshots showed that on the smallest iPhone, Play sat below the screen and the lives bar scrolled away. This was fixed in `ce0931d`, and a browser test now checks it.
@@ -63,7 +63,9 @@
   - Touch drag and drop (21 Oct): drag the item onto a bin, and the bin under the finger lights up. Tapping still works. The drop check is two plain functions with 5 tests (`app/src/features/round/dropTarget.ts`).
   - Tap-to-sort, scoring with streaks, 3 lives, a leaderboard on local data, and explanations with sources.
   - How to play can be opened again (27 Oct, heuristic evaluation F7; plan `notes/plans/2026-10-27-how-to-play-again.md`): a link on the start screen, and a "?" in the round's top bar that opens the rules as a sheet while the round waits. Found from my iPad report; screenshots in `design/gameplay-ui/after/7-how-to-play/`.
-  - 85 unit tests, and browser tests on four phone profiles (98 passing runs on 27 Oct), including dragging onto a bin, dropping outside the bins, the layout at six sizes, the feedback at three and the rules sheet at two.
+  - The round fills every upright screen (27 Oct, after my iPhone 11 Pro Max screenshot; plan `notes/plans/2026-10-27-responsive-round.md`, evidence `design/gameplay-ui/after/8-fill-the-screen/`): the bins take the free height, so the empty band above the hearts went from 82–182px to under 28px, and "Not quite" no longer scrolls the page on small phones. The screens are sized with `svh` so Safari's floating address bar shouldn't cover "Got it". **Not yet checked on the iPhone itself.**
+  - Less text (27 Oct, my decision): the start screen ends at "No account.", and the app shows no source or check date. The sources stay in `items.json` and `research/rule-sources.md`.
+  - 85 unit tests, and browser tests on four phone profiles (122 passing runs on 27 Oct), including dragging onto a bin, dropping outside the bins, the layout at six sizes, the round filling six upright sizes in three states, the feedback at three sizes and the rules sheet at two.
   - The game rules are plain, tested functions (`app/src/domain/game.ts`).
 - **Show it:** showcases 2 and 3, then walk through `roundReducer` in `app/src/domain/game.ts`: what happens on a right answer, a wrong answer and "continue". For drag and drop, explain `targetAt` in `dropTarget.ts` (how a drop becomes the same answer as a tap).
 - **Still missing:**
@@ -79,7 +81,7 @@
   - No N+1 queries: a whole visit is 14 database calls, guarded by a unit test (25 Oct).
   - 16 permission tests pass against the live project (`npm run db:test`, `supabase/tests/permissions.sql`). They prove browsers can't read individual answers or change or delete anything, and they undo their own rows.
 - **Show it:** run `npm run db:test` live, then walk through one grant, one policy and `item_stat` in the SQL file.
-- **Still missing:** the game connected to the database (the Supabase score store), and the privacy line (SCRUM-54).
+- **Still missing:** the game connected to the database (the Supabase score store). The privacy line (SCRUM-54) was built on 25 Oct and removed on 27 Oct by my decision (the start screen ends at "No account."); the Jira ticket needs updating to match.
 - **Jira:** SCRUM-51, SCRUM-52, SCRUM-53, SCRUM-54
 
 ### Integrate, test, deploy

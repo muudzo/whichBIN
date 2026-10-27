@@ -62,16 +62,23 @@ describe('App', () => {
     expect(screen.getByText(/Sort everyday stuff into Leeuwarden/)).toBeInTheDocument()
   })
 
-  it('says answers are saved anonymously when they go to the shared database (SCRUM-54)', () => {
+  // 27 Oct, my decision: the start screen ends at "No account.", also when answers go to the shared database
+  it('ends the start screen at "No account.", with no saving, source or time line', () => {
     render(<App store={{ ...createLocalScoreStore(), isShared: true }} />)
 
-    expect(screen.getByText(/answers are saved anonymously/i)).toBeInTheDocument()
+    expect(screen.getByText('No account.')).toBeInTheDocument()
+    expect(screen.queryByText(/saved anonymously|Omrin|rules from|About 2 minutes/i)).not.toBeInTheDocument()
   })
 
-  it('makes no such claim when answers stay on this device', () => {
+  // 27 Oct, my decision: no source or check date in the app; the sources stay in items.json and research/rule-sources.md
+  it('shows How to play without a source line', async () => {
+    const user = userEvent.setup()
     render(<App store={createLocalScoreStore()} />)
 
-    expect(screen.queryByText(/saved anonymously/i)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Play' }))
+
+    expect(await screen.findByText(/Every wrong answer/)).toHaveTextContent('Every wrong answer tells you why.')
+    expect(screen.queryByText(/Omrin|rules from|checked/i)).not.toBeInTheDocument()
   })
 
   it('shows "Right!" and adds points for the right bin', async () => {
@@ -108,7 +115,7 @@ describe('App', () => {
     const card = await screen.findByRole('region', { name: 'Not quite' })
     expect(within(card).getByText(item.why)).toBeInTheDocument()
     expect(within(card).getByText(`You chose ${wrongBin.getAttribute('aria-label')?.split(':')[0]}.`)).toBeInTheDocument()
-    expect(within(card).getByText(/Source: Omrin waste guide 2026/)).toBeInTheDocument()
+    expect(within(card).queryByText(/Source:|waste guide/)).not.toBeInTheDocument()
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(wrongBin).toHaveAttribute('data-mark', 'wrong')
     expect(binButton(item, true)).toHaveAttribute('data-mark', 'right')

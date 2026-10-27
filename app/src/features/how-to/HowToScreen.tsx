@@ -1,5 +1,4 @@
 import { ArrowLeft } from 'lucide-react'
-import { SourceLine } from '@/components/brand/SourceLine'
 import { Button } from '@/components/ui/button'
 import { BinGrid } from '@/features/round/BinGrid'
 import { HowToSteps } from './HowToSteps'
@@ -13,7 +12,7 @@ type Props = {
 // the start screen's "How to play" link opens it any time, and the "?" in a round opens the same rules as a sheet.
 export function HowToScreen({ onStart, onBack }: Props) {
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
       <header className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={onBack} aria-label="Back">
           <ArrowLeft />
@@ -28,12 +27,9 @@ export function HowToScreen({ onStart, onBack }: Props) {
         <BinGrid isDisabled />
       </section>
 
-      <div className="mt-auto flex flex-col gap-4">
-        <Button size="lg" onClick={onStart}>
-          Start round
-        </Button>
-        <SourceLine />
-      </div>
+      <Button size="lg" className="mt-auto" onClick={onStart}>
+        Start round
+      </Button>
     </main>
   )
 }
