@@ -1,4 +1,4 @@
-import { X } from 'lucide-react'
+import { CircleHelp, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 type Props = {
@@ -7,11 +7,13 @@ type Props = {
   itemCount: number
   // A clearly marked way out of the round (H3). Without it, the button isn't shown.
   onLeave?: () => void
+  // The rules again, as a sheet over the round (F7). Without it, the button isn't shown.
+  onHelp?: () => void
 }
 
-// One quiet row at the top (design review 26 Oct): leave, progress and score, so they don't compete with the bins.
+// One quiet row at the top (design review 26 Oct): leave, progress, score and help, so they don't compete with the bins.
 // The lives sit lower, next to the bins (Lives.tsx).
-export function Hud({ score, itemNumber, itemCount, onLeave }: Props) {
+export function Hud({ score, itemNumber, itemCount, onLeave, onHelp }: Props) {
   const progress = Math.min(100, ((itemNumber - 1) / itemCount) * 100)
 
   return (
@@ -45,6 +47,13 @@ export function Hud({ score, itemNumber, itemCount, onLeave }: Props) {
         {score}
         <span className="sr-only"> points</span>
       </span>
+
+      {onHelp && (
+        // At the other end from ×, with the same size and the same negative margins
+        <Button variant="ghost" size="icon" className="-my-2 -mr-2 shrink-0" onClick={onHelp} aria-label="How to play">
+          <CircleHelp />
+        </Button>
+      )}
     </header>
   )
 }
