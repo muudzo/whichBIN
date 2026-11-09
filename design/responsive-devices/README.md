@@ -28,3 +28,15 @@ Every screen and state was checked at 17 sizes in both engines: 320 × 568, 360 
 | `320x568-round-start`, `390x844-round-right`, `844x390-not-quite`, `768x1024-welcome`, `1440x900-*`, `1920x1080-round-start` | Already worked | The same |
 
 Not shown: notch-safe side padding on the round and start screen (a browser can't emulate a notch), and the 1–6 key numbers, which hide on the bins where the icon sits beside the name.
+
+## Follow-up: big screens (`big-screens/`)
+
+A second step on the same branch (plan: "Follow-up: big screens"). `big-screens/before/` is the branch after the steps above; `big-screens/after/` adds a size step for upright tablets and big desktops and keeps the buttons with their content there. The dev build with the local store; the items were not seeded, so before and after can show different items.
+
+| Pair | Before | After |
+|---|---|---|
+| `768x1024-welcome`, `1024x1366-welcome` | Phone-sized, Play pinned to the bottom, 300–500px empty above it | One block in the middle, 12.5% bigger |
+| `820x1180-round-start`, `1024x1366-round-start` | 16px text, small item, bins 2.15 and 2.09 times as tall as wide | 18px text, bigger item, bins 1.69 and 1.76 |
+| `820x1180-how-to-play`, `820x1180-score`, `820x1180-leaderboard` | Buttons at the bottom, 400–650px below the content | Buttons right under the content |
+| `1920x1080-round-start` | 16px text, a 1024px board | 20px text, the board 25% bigger |
+| `1280x800-welcome` | — | Unchanged (identical file): laptops keep their sizes |

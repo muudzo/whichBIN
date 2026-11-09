@@ -81,3 +81,22 @@ Severity: 4 blocks the task, 3 people fail or struggle, 2 slows or confuses, 1 c
 
 ## Before each commit
 Unit and browser tests, lint, type check and build (`npm run typecheck`, `npm run lint`, `npm run test:run`, `npm run test:e2e`, `npm run build` in `app/`). Screenshots before and after in `design/responsive-devices/`.
+
+## Follow-up: big screens (9 Nov, later the same day)
+Asked for: the whole game responsive on mobile, tablet and desktop, adapting layout, type, images and spacing. Checked the branch (after steps 1–10) at 13 sizes, 320 × 568 to 1920 × 1080, with the design-critic audit (sideways scrolling, overlaps, targets under 44px) and a full round at 390, 768, 820, 1440 and 1920 wide. Phones, upright and sideways, had no problems left. Tablets and big desktops did:
+
+| # | Where | Problem | Sev |
+|---|---|---|---|
+| 14 | Tablets and big desktops, every screen | The phone's sizes on a screen two or three times as big: 16px text, 14px instructions, and the item as small as on a phone. At 820 × 1180 the item was the smallest thing on screen, under bins 2.15 times as tall as wide | 2 |
+| 15 | Tablets: start screen, How to play, score, leaderboard | The buttons stayed pinned to the bottom (phones: thumb reach), leaving 300–650px of empty screen between the content and Play / Start round / Play again | 2 |
+
+| Step | Change | Files | Fixes |
+|---|---|---|---|
+| 11 | **A size step for big screens:** where the screen is at least 768 × 896 (`roomy`: upright tablets, and desktops from 1440 × 900) the root text size is 112.5% (18px), and 125% (20px) from 1440 × 960. Everything in rem (text, spacing, buttons, the item, column widths) grows by the same step, so the look stays the same. A percentage, so a player's own text size still counts; media queries in rem ignore it, so no breakpoint moves. Not laptops (1280 × 800 and lower): with the step there, the start screen ran 31px past a 1280 × 800 screen. Upright tablets under 1024px wide also get a bigger item (`size-44`, its name a step up) | `global.css`, `ItemSticker.tsx` | 14 |
+| 12 | **Buttons with their content on tablets:** from `roomy` up, the start screen is one block in the middle (name, stickers, Play), and How to play, score and leaderboard keep their buttons right under the content instead of at the bottom. Phones are unchanged | `WelcomeScreen.tsx`, `HowToScreen.tsx`, `ScoreScreen.tsx`, `LeaderboardScreen.tsx` | 15 |
+
+This revises two "Not changing" points above: on big desktops (1440 × 900 and up) the round's board and the reading column now grow with the size step, because everything grows together.
+
+**Result:** at all 13 sizes, the start screen and the round don't scroll sideways or down, and the audit finds no overlap and no target under 44px. Root text size: 16px on phones, phones held sideways, 1024 × 768 and 1280 × 800 (unchanged); 18px on 768 × 1024, 820 × 1180, 1024 × 1366 and 1440 × 900; 20px on 1920 × 1080. Upright tablets: bins 192 × 412 → 216 × 365 at 820 × 1180 (2.15 → 1.69 times as tall as wide), 224 × 469 → 252 × 443 at 1024 × 1366; bin names 16.5 → 18.4px. The responsive browser test passes 34 of 34 (Chromium and WebKit), unit tests 85 of 85, type check clean. Screenshots: `design/responsive-devices/big-screens/`.
+
+**Still open:** when the top-left bin (Sortibak) opens, its lid swings up behind the hearts. The hearts stay on top and readable, so it is cosmetic, and it is not new. The 1024 × 768 and 1280 × 800 screens keep the phone sizes on purpose (laptops are close to the eyes).
