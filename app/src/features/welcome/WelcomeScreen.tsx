@@ -21,7 +21,10 @@ const LINK = 'h-11 px-3 underline decoration-2'
 
 export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard }: Props) {
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col px-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+    // Phones held sideways: two columns, the name and the one-line pitch on the left, Play and the links on the right
+    // (9 Nov). Stacked, the page scrolled 51–99px there and at 568 × 320 Play was half below the screen.
+    // px-safe-*: the side padding clears a notched iPhone's notch when it is held sideways (global.css).
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col px-safe-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-safe-8 landscape-phone:max-w-3xl landscape-phone:flex-row landscape-phone:items-center landscape-phone:gap-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
       <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 
@@ -33,7 +36,7 @@ export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard }: Props) {
           <br />
           Bin?
         </h1>
-        <p className="max-w-[18rem] text-lead md:max-w-sm">
+        <p className="max-w-[18rem] text-lead md:max-w-sm landscape-phone:max-w-sm">
           Sort everyday stuff into Leeuwarden&apos;s real bins. Every mistake tells you why.
         </p>
 
@@ -47,7 +50,7 @@ export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard }: Props) {
       </section>
 
       {/* Play, the two links and one small line, 16px apart */}
-      <div className="flex flex-col gap-4 short:gap-2">
+      <div className="flex flex-col gap-4 short:gap-2 landscape-phone:w-56 landscape-phone:shrink-0">
         <Button size="lg" onClick={onPlay}>
           Play
         </Button>
