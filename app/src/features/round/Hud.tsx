@@ -17,7 +17,10 @@ export function Hud({ score, itemNumber, itemCount, onLeave, onHelp }: Props) {
   const progress = Math.min(100, ((itemNumber - 1) / itemCount) * 100)
 
   return (
-    <header className="flex items-center gap-2">
+    // flex-wrap: with text at 200% the row is wider than the phone, and the phone zoomed the whole page out to show it
+    // (9 Nov). Now the end of the row wraps onto a second line instead. The progress bar keeps at least 16px (min-w-4),
+    // so at normal text sizes it all still fits on one line, down to 320px wide with a 4-digit score (the bar is then 27px).
+    <header className="flex flex-wrap items-center gap-2">
       {onLeave && (
         // 44px to tap, but the negative margins keep the row as low as the score
         <Button variant="ghost" size="icon" className="-my-2 -ml-2 shrink-0" onClick={onLeave} aria-label="Leave round">
@@ -26,7 +29,7 @@ export function Hud({ score, itemNumber, itemCount, onLeave, onHelp }: Props) {
       )}
 
       <div
-        className="h-3 flex-1 overflow-hidden rounded-full border-2 border-ink bg-paper"
+        className="h-3 min-w-4 flex-1 overflow-hidden rounded-full border-2 border-ink bg-paper"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={itemCount}

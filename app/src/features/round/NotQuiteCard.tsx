@@ -41,7 +41,8 @@ export function NotQuiteCard({ item, chosen, stat, onContinue }: Props) {
         <p className="text-body leading-snug short:text-small">{item.why}</p>
         {community && <p className="text-small font-bold">{community}</p>}
       </div>
-      <Button autoFocus aria-describedby={explanationId} onClick={onContinue} className="w-full">
+      {/* 44px on phones held sideways, still a full touch target: at 568 × 320 the longest card (batteries) was 5px too tall (9 Nov) */}
+      <Button autoFocus aria-describedby={explanationId} onClick={onContinue} className="w-full landscape-phone:h-11">
         Got it
       </Button>
     </motion.section>
