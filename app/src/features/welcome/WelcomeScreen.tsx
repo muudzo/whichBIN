@@ -24,11 +24,13 @@ export function WelcomeScreen({ onPlay, onHowTo, onLeaderboard }: Props) {
     // Phones held sideways: two columns, the name and the one-line pitch on the left, Play and the links on the right
     // (9 Nov). Stacked, the page scrolled 51–99px there and at 568 × 320 Play was half below the screen.
     // px-safe-*: the side padding clears a notched iPhone's notch when it is held sideways (global.css).
-    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col px-safe-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-safe-8 landscape-phone:max-w-3xl landscape-phone:flex-row landscape-phone:items-center landscape-phone:gap-8">
+    // Tablets and desktops (roomy, global.css): the name, the pitch and Play as one block in the middle of the screen.
+    // Play pinned to the bottom there left 300–500px of empty screen between the stickers and Play (9 Nov).
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col px-safe-4 pt-6 pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-safe-8 roomy:justify-center roomy:gap-6 landscape-phone:max-w-3xl landscape-phone:flex-row landscape-phone:items-center landscape-phone:gap-8">
       {/* The Frisian flag's stripes, across the full width of the screen at any size */}
       <div aria-hidden="true" className="stripes absolute inset-x-0 top-0 h-6 border-b-[3px] border-ink" />
 
-      <section aria-labelledby="welcome-title" className="flex flex-1 flex-col items-center justify-center gap-4 py-4 text-center short:gap-2 short:py-2">
+      <section aria-labelledby="welcome-title" className="flex flex-1 flex-col items-center justify-center gap-4 py-4 text-center short:gap-2 short:py-2 roomy:flex-none">
         <p className="rounded-full border-2 border-ink bg-sun px-4 py-1 text-small font-bold">A 2-minute game · Leeuwarden</p>
         {/* Two stacked words that read as one logo: tighter than the display step's own line height */}
         <h1 id="welcome-title" className="font-heading text-display leading-[0.9] font-extrabold">

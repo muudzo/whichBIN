@@ -113,7 +113,8 @@ export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay,
         </>
       )}
 
-      <div className="mt-auto flex flex-col gap-4">
+      {/* At the bottom on phones, in thumb reach; on tablets and desktops (roomy) right under the lists (9 Nov) */}
+      <div className="mt-auto flex flex-col gap-4 roomy:mt-4">
         <Button size="lg" onClick={onPlay}>
           {hasPlayed ? 'Play again' : 'Play'}
         </Button>
