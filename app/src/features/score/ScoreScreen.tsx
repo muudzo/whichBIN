@@ -112,7 +112,8 @@ export function ScoreScreen({ result, store, onNextRound, onSaved, onLeaderboard
         )}
       </section>
 
-      <div className="mt-auto flex flex-col gap-2">
+      {/* At the bottom on phones, in thumb reach; on tablets and desktops (roomy) right under the results (9 Nov) */}
+      <div className="mt-auto flex flex-col gap-2 roomy:mt-4">
         <Button variant="secondary" size="lg" onClick={onNextRound}>
           Next round
         </Button>
