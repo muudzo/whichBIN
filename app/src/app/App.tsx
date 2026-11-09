@@ -50,6 +50,13 @@ export function App({ store }: Props) {
     if (screen.name !== 'welcome' && !isGameEntry(window.history.state)) window.history.pushState(GAME_ENTRY, '')
   }, [screen.name])
 
+  // Every screen opens at the top (9 Nov). The screens share one page, so a new screen kept the old one's scroll
+  // position: on a phone held sideways the leaderboard, opened from the bottom of the score screen, opened scrolled
+  // down with its title out of view.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [screen])
+
   function goHome() {
     setIsConfirmingLeave(false)
     if (!isGameEntry(window.history.state)) {
