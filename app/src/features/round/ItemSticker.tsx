@@ -24,9 +24,11 @@ type Props = {
 // The bins are the big targets; the item sits below them in the tray (design review 26 Oct).
 // On phones the sticker follows the screen's height, so the lives bar and all six bins always fit.
 // max-md: keeps the height rules to phones; otherwise they would override the md: and lg: sizes.
+// Upright tablets under 1024px wide (max-lg:roomy, 9 Nov) get a bigger item: it is what the player sorts, but at
+// size-36 it was the smallest thing on an 820 × 1180 screen, under bins twice as tall as wide. The bins give up the height.
 const SIZES = {
   md: 'size-28',
-  lg: 'size-28 max-md:short:size-20 max-md:short:p-2 max-md:tall:size-32 md:size-36 landscape-phone:size-24 lg:size-48',
+  lg: 'size-28 max-md:short:size-20 max-md:short:p-2 max-md:tall:size-32 md:size-36 max-lg:roomy:size-44 landscape-phone:size-24 lg:size-48',
 } as const
 
 // While dragged, the sticker shrinks to about this size on screen (px) on every device, so the name of the bin
@@ -127,7 +129,7 @@ export function ItemSticker({ item, size = 'lg', shouldHint = false, onPickUp, o
       {/* The name fades while dragging, so it doesn't trail over the bins' labels */}
       <motion.figcaption
         animate={{ opacity: isDragging ? 0 : 1 }}
-        className="text-center font-heading text-title font-extrabold lg:text-heading"
+        className="text-center font-heading text-title font-extrabold max-lg:roomy:text-heading lg:text-heading"
       >
         {item.name}
       </motion.figcaption>

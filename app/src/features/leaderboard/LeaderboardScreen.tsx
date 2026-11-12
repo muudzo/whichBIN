@@ -40,8 +40,11 @@ export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay,
   }
 
   return (
-    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
-      <h1 className="flex items-center gap-2 font-heading text-heading font-extrabold">
+    <main className="@container mx-auto flex min-h-svh w-full max-w-md flex-col gap-6 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8">
+      {/* With text at 200% "Leaderboard" alone was wider than a phone, and the page scrolled sideways (9 Nov).
+          Where the screen is under 16rem wide (a container query in rem, so only with bigger text or zoomed in;
+          a 320px phone at normal text is 18rem) the title drops a step and the trophy may sit on its own line. */}
+      <h1 className="flex items-center gap-2 font-heading text-heading font-extrabold @max-[16rem]:flex-wrap @max-[16rem]:text-title">
         <Trophy className="size-8 text-fries-blue" aria-hidden="true" /> Leaderboard
       </h1>
 
@@ -56,7 +59,7 @@ export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay,
           <p role="alert" className="font-bold text-pompebled">
             Couldn&apos;t load the leaderboard. Check your connection, then try again.
           </p>
-          <Button variant="secondary" size="sm" onClick={handleRetry}>
+          <Button variant="secondary" onClick={handleRetry}>
             Try again
           </Button>
         </div>
@@ -110,7 +113,8 @@ export function LeaderboardScreen({ store, highlight, hasPlayed = false, onPlay,
         </>
       )}
 
-      <div className="mt-auto flex flex-col gap-4">
+      {/* At the bottom on phones, in thumb reach; on tablets and desktops (roomy) right under the lists (9 Nov) */}
+      <div className="mt-auto flex flex-col gap-4 roomy:mt-4">
         <Button size="lg" onClick={onPlay}>
           {hasPlayed ? 'Play again' : 'Play'}
         </Button>

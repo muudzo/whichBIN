@@ -28,6 +28,9 @@ if (!Element.prototype.setPointerCapture) {
   Element.prototype.hasPointerCapture = () => false
 }
 
+// jsdom has no scrolling; the app scrolls to the top when it shows a new screen.
+window.scrollTo = () => {}
+
 afterEach(() => {
   cleanup()
 })

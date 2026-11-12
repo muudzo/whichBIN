@@ -182,7 +182,10 @@ export function RoundScreen({
     // svh, the height with the browser's bars shown (27 Oct): on my iPhone, Safari's floating address bar covered
     // "Got it" at the bottom of a dvh-tall screen.
     // No row gap: an empty feedback row would still get a gap on both sides. Each area brings its own space instead.
-    <main className="round-layout mx-auto h-svh w-full max-w-md px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-xl md:px-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:pt-2 lg:max-w-5xl lg:gap-x-12">
+    // Widths (9 Nov): tablets held upright get a wider column than phones, 672px from md and 768px from lg, so their
+    // bins aren't thin and tall; only screens wider than tall get the 1024px side-by-side board (lg:landscape).
+    // px-safe-*: the side padding clears a notched iPhone's notch when it is held sideways (global.css).
+    <main className="round-layout mx-auto h-svh w-full max-w-md px-safe-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] short:pt-[max(0.5rem,env(safe-area-inset-top))] short:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:max-w-2xl md:px-safe-8 landscape-phone:max-w-3xl landscape-phone:gap-x-6 landscape-phone:pt-2 lg:max-w-3xl lg:gap-x-12 lg:landscape:max-w-5xl">
       <div className="pb-4 [grid-area:hud] short:pb-2 lg:pb-6">
         <Hud
           score={state.score}
@@ -193,84 +196,96 @@ export function RoundScreen({
         />
       </div>
 
-      {/* Feedback on the previous item names it, so "Right!" can never be read as the answer for the item now on screen. */}
-      {/* Empty, it takes no room (27 Oct: no empty band above the bins); a card takes its room from the bins.
-          Side by side, it folds away while "Not quite" shows, so the card below it gets the height. */}
-      <div
-        aria-live="polite"
-        className={`flex items-center justify-center [grid-area:feedback] ${explained ? 'side-by-side:hidden' : ''}`}
-      >
-        {rightItem && state.phase === 'sorting' && (
-          <motion.div
-            key={rightItem.id}
-            initial={{ y: -8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="sticker mb-4 w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm short:mb-2 lg:mb-6"
-          >
-            {/* The whole explanation, never cut off: this is where the player learns why (design review 26 Oct).
-                One paragraph, the verdict in bold leading into the reason, so it takes as few lines as possible. */}
-            <p className="text-small leading-snug text-ink-muted">
-              <Check className="mr-1 inline size-4 align-[-3px] text-meadow" aria-hidden="true" />
-              <strong className="text-meadow">Right!</strong>{' '}
-              <strong className="text-ink">
-                {rightItem.name} → {binFor(rightItem.bin).name}
-              </strong>
-              . {rightItem.why}
-            </p>
-          </motion.div>
-        )}
-      </div>
-
-      {/* In the code the item comes before the bins, which is the order a screen reader reads them in;
-          on screen, the grid areas put the item at the bottom. Upright, it sits at the top of its area, right under the bins.
-          The item and the "Not quite" card share one grid cell (*:col-start-1 *:row-start-1), so the card appears where
-          the item was while the item flies off to the right bin. */}
-      <div className="grid pt-4 [grid-area:tray] short:pt-2 *:col-start-1 *:row-start-1">
-        <section
-          aria-label="Item to sort"
-          onPointerDown={startDrag}
-          className={`flex flex-col items-center justify-start side-by-side:justify-center ${isAnswerable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
+      {/* One box for the feedback and the item. `contents` makes the box itself disappear, so its two parts take their
+          own grid areas (feedback, tray) as before. On a phone held sideways it is a real column instead: the grid's
+          left area, full height, the feedback on top and the item in the rest (9 Nov, round-layout in global.css). */}
+      <div className="contents landscape-phone:flex landscape-phone:flex-col landscape-phone:[grid-area:left]">
+        {/* Feedback on the previous item names it, so "Right!" can never be read as the answer for the item now on screen. */}
+        {/* Empty, it takes no room (27 Oct: no empty band above the bins); a card takes its room from the bins.
+            Side by side, it folds away while "Not quite" shows, so the card below it gets the height. */}
+        <div
+          aria-live="polite"
+          className={`flex items-center justify-center [grid-area:feedback] ${explained ? 'side-by-side:hidden' : ''}`}
         >
-          <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
-            {item && state.phase === 'sorting' && (
-              <ItemSticker
-                key={item.id}
-                item={item}
-                shouldHint={isFirstItem}
-                onPickUp={isAnswerable ? handlePickUp : undefined}
-                onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
-                onDrop={isAnswerable ? handleDrop : undefined}
-                dragControls={dragControls}
-              />
-            )}
-          </AnimatePresence>
-          {/* First-time players: the instruction where they're looking, under the item, until their first answer */}
-          {isFirstItem && state.phase === 'sorting' && (
-            <p className="mt-2 text-center text-small font-bold">
-              Drag it into its bin, or <span className="pointer-fine:hidden">tap</span>
-              <span className="hidden pointer-fine:inline">click</span> the bin
-            </p>
+          {rightItem && state.phase === 'sorting' && (
+            <motion.div
+              key={rightItem.id}
+              initial={{ y: -8, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="sticker mb-4 w-full bg-meadow-tint px-4 py-2 shadow-sticker-sm short:mb-2 lg:mb-6"
+            >
+              {/* The whole explanation, never cut off: this is where the player learns why (design review 26 Oct).
+                  One paragraph, the verdict in bold leading into the reason, so it takes as few lines as possible. */}
+              <p className="text-small leading-snug text-ink-muted">
+                <Check className="mr-1 inline size-4 align-[-3px] text-meadow" aria-hidden="true" />
+                <strong className="text-meadow">Right!</strong>{' '}
+                <strong className="text-ink">
+                  {rightItem.name} → {binFor(rightItem.bin).name}
+                </strong>
+                . {rightItem.why}
+              </p>
+            </motion.div>
           )}
-        </section>
-        {explained && (
-          <NotQuiteCard
-            item={explained.item}
-            chosen={explained.chosen}
-            stat={stat}
-            onContinue={() => apply({ type: 'continue' })}
-          />
-        )}
+        </div>
+
+        {/* In the code the item comes before the bins, which is the order a screen reader reads them in;
+            on screen, the grid areas put the item at the bottom. Upright, it sits at the top of its area, right under the bins.
+            The item and the "Not quite" card share one grid cell (*:col-start-1 *:row-start-1), so the card appears where
+            the item was while the item flies off to the right bin.
+            Sideways it takes the rest of the left column (flex-1) and needs no space on top: nothing sits right above it
+            but the "Right!" card, which brings its own margin. */}
+        <div className="grid pt-4 [grid-area:tray] short:pt-2 landscape-phone:flex-1 landscape-phone:pt-0 *:col-start-1 *:row-start-1">
+          <section
+            aria-label="Item to sort"
+            onPointerDown={startDrag}
+            className={`flex flex-col items-center justify-start side-by-side:justify-center ${isAnswerable ? 'cursor-grab touch-none active:cursor-grabbing' : ''}`}
+          >
+            <AnimatePresence mode="wait" custom={flyTo} onExitComplete={() => setIsSwapping(false)}>
+              {item && state.phase === 'sorting' && (
+                <ItemSticker
+                  key={item.id}
+                  item={item}
+                  shouldHint={isFirstItem}
+                  onPickUp={isAnswerable ? handlePickUp : undefined}
+                  onDragMove={isAnswerable ? (point) => setHoveredBin(binAt(point)) : undefined}
+                  onDrop={isAnswerable ? handleDrop : undefined}
+                  dragControls={dragControls}
+                />
+              )}
+            </AnimatePresence>
+            {/* First-time players: the instruction where they're looking, under the item, until their first answer */}
+            {isFirstItem && state.phase === 'sorting' && (
+              <p className="mt-2 text-center text-small font-bold">
+                Drag it into its bin, or <span className="pointer-fine:hidden">tap</span>
+                <span className="hidden pointer-fine:inline">click</span> the bin
+              </p>
+            )}
+          </section>
+          {explained && (
+            <NotQuiteCard
+              item={explained.item}
+              chosen={explained.chosen}
+              stat={stat}
+              onContinue={() => apply({ type: 'continue' })}
+            />
+          )}
+        </div>
       </div>
 
       {/* Upright, the bins fill the free height (flex-1), up to a tall wheelie bin's shape (max-h-wheelie, measured
           against this area's width: @container), and keep close to the item below them (justify-end).
           Side by side they keep the earlier limits and sit in the middle of their column.
-          The lives sit right on top of the bins and move with them: in view while sorting, without crowding the bottom. */}
+          The lives sit right on top of the bins and move with them: in view while sorting, without crowding the bottom.
+          Bigger text (9 Nov): at 200% the bin names were wider than a third of the phone and ran into each other.
+          The @max-[…rem] rules are container queries in rem: rem grows with the text size, and zooming in makes the area
+          narrower, so they switch on only when the text is big for the space: under 17rem of width (a 320px phone from about 105% text, a 375px
+          phone from about 125%) two bins per row, under 12rem (a 375px phone from about 170%) one. The rows then grow with their
+          labels (no wheelie limit) and the page scrolls. At normal text every phone is at least 18rem wide: no change. */}
       <div className="@container flex flex-col justify-end gap-2 [grid-area:bins] side-by-side:justify-center">
         <Lives lives={state.lives} streak={state.streak} />
         <BinGrid
           ref={binsRef}
-          className="max-h-wheelie flex-1 grid-rows-[1fr_1fr] side-by-side:max-h-80 side-by-side:tall:max-h-96 side-by-side:md:tall:max-h-[30rem]"
+          className="max-h-wheelie flex-1 grid-rows-[1fr_1fr] side-by-side:max-h-80 side-by-side:tall:max-h-96 side-by-side:md:tall:max-h-[30rem] @max-[17rem]:max-h-none @max-[17rem]:grid-cols-2 @max-[17rem]:grid-rows-none @max-[17rem]:auto-rows-fr @max-[12rem]:grid-cols-1"
           isDisabled={!isAnswerable}
           highlighted={explained ? explained.item.bin : hoveredBin}
           marks={marks}

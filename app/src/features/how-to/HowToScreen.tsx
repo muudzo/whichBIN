@@ -27,7 +27,9 @@ export function HowToScreen({ onStart, onBack }: Props) {
         <BinGrid isDisabled />
       </section>
 
-      <Button size="lg" className="mt-auto" onClick={onStart}>
+      {/* At the bottom on phones, in thumb reach. Tablets and desktops (roomy, global.css) keep it under the bins:
+          pinned to the bottom there, it left 400px or more of empty screen between the bins and the button (9 Nov). */}
+      <Button size="lg" className="mt-auto roomy:mt-4" onClick={onStart}>
         Start round
       </Button>
     </main>
